@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="theme-color" content="#0b3d91">
-<title>ManteniPro v1.5.1 - Mantenimiento de Equipos</title>
+<title>ManteniPro v1.6.0 - Mantenimiento de Equipos</title>
 <style>
 :root{--azul:#0b3d91;--azul2:#1565c0;--rojo:#c62828;--ama:#f9a825;--verde:#2e7d32;--gris:#f3f5f9;--borde:#d5dbe5}
 *{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--gris);color:#1d2433}
@@ -49,7 +49,7 @@ label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
 </div>
 
 <div id="app" class="hide">
-<header><h1>🔧 ManteniPro – Mantenimiento de Equipos <small style="font-size:11px;opacity:.7">v1.5.1</small></h1><span id="who"></span><button class="btn s sm" onclick="logout()">Salir</button></header>
+<header><h1>🔧 ManteniPro – Mantenimiento de Equipos <small style="font-size:11px;opacity:.7">v1.6.0</small></h1><span id="who"></span><button class="btn s sm" onclick="logout()">Salir</button></header>
 <nav id="nav"></nav>
 <main id="main"></main>
 </div>
@@ -202,7 +202,7 @@ R.equipos2=()=>{
   tq.innerHTML=`<div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Ubicación</th><th>Prioridad</th><th>Status</th><th>Estado</th><th>Próximo PM</th><th></th></tr>
   ${l.map(e=>{const ps=DB.planes.filter(p=>p.equipoId===e.id&&p.activo).map(prox).sort();return `<tr><td>${esc(e.codigo)}</td><td>${esc(e.nombre)}</td><td>${esc(e.tipo)}</td><td>${esc(e.ubicacion)}</td>
   <td>${prTag(e.prioridad)}</td><td>${puede(1)?`<select class="stsel" style="width:auto;padding:3px" onchange="setStatus('${e.id}',this.value)">${STATUS.map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select>`:''} ${stTag(e.status)}</td><td>${esc(e.estado)}</td><td>${ps[0]?ps[0]+' '+estadoTag(diff(ps[0])):'-'}</td>
-  <td><button class="btn sm s" onclick="histEq('${e.id}')">Historial</button> <button class="btn sm s" onclick="nuevaCorr('${e.id}')">Falla/OT</button>
+  <td><button class="btn sm s" onclick="histEq('${e.id}')">Historial</button> <button class="btn sm s" onclick="nuevaCorr('${e.id}')">Falla/OT</button>${puede(2)?` <button class="btn sm s" onclick="editPlan(null,false,'${e.id}')">+ Plan PM</button>`:''}
   ${puede(2)?`<button class="btn sm" onclick="editEq('${e.id}')">Editar</button>`:''}</td></tr>`}).join('')}</table></div>`;
 };
 function editEq(id){
@@ -227,34 +227,66 @@ function borraEq(id){if(!confirm('¿Eliminar equipo y sus planes?'))return;const
   DB.equipos=DB.equipos.filter(x=>x.id!==id);DB.planes=DB.planes.filter(p=>p.equipoId!==id);audit('Eliminó equipo '+e.codigo);save();cerrar();R.equipos()}
 
 R.planes=()=>{
-  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Planes de Mantenimiento Preventivo</h2>${puede(2)?'<button class="btn" onclick="editPlan()">+ Nuevo plan PM</button>':''}</div>
-  <div class="tw"><table><tr><th>Equipo</th><th>Descripción</th><th>Frecuencia</th><th>Crew</th><th>Último</th><th>Próximo</th><th>Estado</th><th></th></tr>
-  ${DB.planes.slice().sort((a,b)=>prox(a).localeCompare(prox(b))).map(p=>`<tr><td>${esc(eqN(p.equipoId))}</td><td>${esc(p.descripcion)}</td><td>${frecTxt(p.frecuencia)}</td><td>${p.crew}</td>
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">🗓️ Planes de Mantenimiento Preventivo</h2>
+  <select id="pf_eq" style="max-width:240px" onchange="R.planes2()"><option value="">Todos los equipos</option>${DB.equipos.map(e=>`<option value="${e.id}">${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select>
+  <select id="pf_st" style="max-width:150px" onchange="R.planes2()"><option value="">Todos</option><option value="v">Vencidos</option><option value="p">Próximos ≤7 días</option><option value="i">Inactivos</option></select>
+  <input id="pf_q" placeholder="Buscar..." style="max-width:180px" oninput="R.planes2()">
+  ${puede(2)?'<button class="btn" onclick="editPlan()">+ Nuevo plan PM</button>':''}</div><div id="tpl"></div></div>`;R.planes2();
+};
+R.planes2=()=>{
+  const e=pf_eq.value,st=pf_st.value,q=pf_q.value.toLowerCase();
+  const l=DB.planes.filter(p=>(!e||p.equipoId===e)&&(!q||(p.descripcion+' '+eqN(p.equipoId)+' '+p.tareas).toLowerCase().includes(q))&&
+    (!st||(st==='i'?!p.activo:p.activo&&(st==='v'?diff(prox(p))<0:diff(prox(p))>=0&&diff(prox(p))<=7)))).sort((a,b)=>prox(a).localeCompare(prox(b)));
+  tpl.innerHTML=`<p style="font-size:12px;color:#666">${l.length} de ${DB.planes.length} planes</p><div class="tw"><table><tr><th>Equipo</th><th>Descripción</th><th>Frecuencia</th><th>Crew</th><th>Checklist</th><th>Último</th><th>Próximo</th><th>Estado</th><th></th></tr>
+  ${l.map(p=>`<tr><td>${esc(eqN(p.equipoId))}</td><td>${esc(p.descripcion)}</td><td>${frecTxt(p.frecuencia)}</td><td>${p.crew}</td><td>${(p.tareas||'').split('\n').filter(Boolean).length} tareas</td>
   <td>${p.ultima}</td><td>${prox(p)}</td><td>${p.activo?estadoTag(diff(prox(p))):'<span class="tag t-g">Inactivo</span>'}</td>
-  <td>${puede(2)?`<button class="btn sm" onclick="editPlan('${p.id}')">Editar</button>`:''}</td></tr>`).join('')}</table></div></div>`;
+  <td style="white-space:nowrap">${puede(2)?`<button class="btn sm" onclick="editPlan('${p.id}')">✏️ Editar</button> <button class="btn sm s" title="Duplicar" onclick="editPlan('${p.id}',true)">⧉</button> <button class="btn sm r" title="Eliminar" onclick="borraPlan('${p.id}')">🗑</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9">Sin planes.</td></tr>'}</table></div>`;
 };
 const FREQ=[[1,'Diario'],[7,'Semanal'],[14,'Cada 2 semanas'],[30,'Mensual'],[90,'Trimestral'],[180,'Semestral'],[365,'Anual']];
 const frecTxt=d=>(FREQ.find(f=>f[0]==d)||[0,d+' días'])[1];
-function editPlan(id){
-  const p=DB.planes.find(x=>x.id===id)||{equipoId:'',descripcion:'',frecuencia:30,crew:'EMT',tareas:'',ultima:hoy(),activo:true};
-  modal_(`<h2>${id?'Editar':'Nuevo'} plan PM</h2><div class="grid">
-  <label>Equipo<select id="p_eq">${DB.equipos.map(e=>`<option value="${e.id}" ${e.id===p.equipoId?'selected':''}>${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select></label>
-  <label>Descripción<input id="p_desc" value="${esc(p.descripcion)}"></label>
-  <label>Frecuencia<select id="p_fr">${FREQ.map(f=>`<option value="${f[0]}" ${f[0]==p.frecuencia?'selected':''}>${f[1]}</option>`).join('')}</select></label>
+function editPlan(id,dup,eqId){
+  const src=DB.planes.find(x=>x.id===id);
+  const p=src?{...src}:{equipoId:eqId||'',descripcion:'',frecuencia:30,crew:'EMT',tareas:'',ultima:hoy(),activo:true};
+  if(dup){p.descripcion+=' (copia)';id=''}
+  const std=FREQ.some(f=>f[0]==p.frecuencia);
+  modal_(`<h2>${dup?'Duplicar':id?'Editar':'Nuevo'} plan PM</h2><div class="grid">
+  <label>Equipo <b style="color:var(--rojo)">*</b><select id="p_eq"><option value="">-- Seleccione equipo --</option>${DB.equipos.map(e=>`<option value="${e.id}" ${e.id===p.equipoId?'selected':''}>${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select></label>
+  <label>Descripción <b style="color:var(--rojo)">*</b><input id="p_desc" value="${esc(p.descripcion)}"></label>
+  <label>Frecuencia<select id="p_fr" onchange="p_dias.parentElement.style.display=this.value==='0'?'block':'none'">${FREQ.map(f=>`<option value="${f[0]}" ${std&&f[0]==p.frecuencia?'selected':''}>${f[1]}</option>`).join('')}<option value="0" ${std?'':'selected'}>Personalizada (días)</option></select></label>
+  <label style="display:${std?'none':'block'}">Cada cuántos días<input type="number" min="1" id="p_dias" value="${p.frecuencia}"></label>
   <label>Crew<select id="p_crew">${['EMT','CONTROL','CONTRATISTA'].map(c=>`<option ${c===p.crew?'selected':''}>${c}</option>`).join('')}</select></label>
-  <label>Última realización<input type="date" id="p_ult" value="${p.ultima}"></label>
+  <label>Última realización<input type="date" id="p_ult" value="${p.ultima}" max="${hoy()}"></label>
   <label>Activo<select id="p_act"><option value="1">Sí</option><option value="0" ${p.activo?'':'selected'}>No</option></select></label></div>
-  <label>Tareas / checklist (una por línea)<textarea id="p_tar" rows="6">${esc(p.tareas)}</textarea></label>
-  <div class="row"><button class="btn" onclick="guardaPlan('${id||''}')">Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button>
-  ${id&&puede(3)?`<button class="btn r" onclick="borraPlan('${id}')">Eliminar</button>`:''}</div>`);
+  <label>Tareas / checklist (una por línea)<textarea id="p_tar" rows="7">${esc(p.tareas)}</textarea></label>
+  <p style="font-size:12px;color:#666" id="p_prox"></p>
+  <div class="row"><button class="btn v" onclick="guardaPlan('${id||''}')">💾 Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button>
+  ${id&&puede(2)?`<button class="btn r" onclick="borraPlan('${id}')">🗑 Eliminar</button>`:''}</div>`);
+  const upd=()=>{const f=p_fr.value==='0'?+p_dias.value:+p_fr.value;p_prox.textContent=f>0&&p_ult.value?'Próximo PM: '+addDias(p_ult.value,f):''};
+  [p_fr,p_dias,p_ult].forEach(x=>x.addEventListener('input',upd));upd();
 }
 function guardaPlan(id){
-  const o={equipoId:p_eq.value,descripcion:p_desc.value.trim(),frecuencia:+p_fr.value,crew:p_crew.value,ultima:p_ult.value,activo:p_act.value==='1',tareas:p_tar.value};
+  const f=p_fr.value==='0'?Math.round(+p_dias.value):+p_fr.value;
+  const o={equipoId:p_eq.value,descripcion:p_desc.value.trim(),frecuencia:f,crew:p_crew.value,ultima:p_ult.value,activo:p_act.value==='1',tareas:p_tar.value.split('\n').map(t=>t.trim()).filter(Boolean).join('\n')};
+  if(!o.equipoId) return alert('Seleccione el equipo');
   if(!o.descripcion) return alert('Falta descripción');
-  if(id){Object.assign(DB.planes.find(x=>x.id===id),o);audit('Editó plan PM '+o.descripcion)}else{DB.planes.push({id:uid(),...o});audit('Creó plan PM '+o.descripcion)}
-  generarOTs();save();cerrar();R.planes();
+  if(!(f>=1)) return alert('La frecuencia debe ser de al menos 1 día');
+  if(!o.ultima) return alert('Indique la fecha de última realización');
+  if(id){
+    const p=DB.planes.find(x=>x.id===id);Object.assign(p,o);
+    DB.ots.filter(t=>t.planId===id&&t.estado!=='Completada').forEach(t=>{
+      if(!o.activo){DB.ots=DB.ots.filter(x=>x.id!==t.id);return}
+      Object.assign(t,{equipoId:o.equipoId,descripcion:o.descripcion,crew:o.crew,fin:prox(p),inicio:addDias(prox(p),-7)})});
+    DB.ots=DB.ots.filter(t=>!(t.planId===id&&t.estado!=='Completada'&&diff(t.fin)>7));
+    audit('Editó plan PM '+o.descripcion);
+  }else{DB.planes.push({id:uid(),...o});audit('Creó plan PM '+o.descripcion+' ('+eqN(o.equipoId)+')')}
+  generarOTs();save();cerrar();go('planes');
 }
-function borraPlan(id){if(!confirm('¿Eliminar plan?'))return;DB.planes=DB.planes.filter(x=>x.id!==id);audit('Eliminó plan PM');save();cerrar();R.planes()}
+function borraPlan(id){
+  const p=DB.planes.find(x=>x.id===id),ab=DB.ots.filter(t=>t.planId===id&&t.estado!=='Completada');
+  if(!confirm(`¿Eliminar el plan "${p.descripcion}" de ${eqN(p.equipoId)}?`+(ab.length?`\n\nTambién se borrará(n) ${ab.length} orden(es) abierta(s) de este plan.`:'')+'\nEl historial de trabajos completados se conserva.'))return;
+  DB.planes=DB.planes.filter(x=>x.id!==id);DB.ots=DB.ots.filter(t=>!(t.planId===id&&t.estado!=='Completada'));
+  audit(`Eliminó plan PM ${p.descripcion} (${eqN(p.equipoId)})`);save();cerrar();go('planes');
+}
 
 R.ots=()=>{
   main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Órdenes de Trabajo abiertas</h2>
@@ -279,7 +311,6 @@ function cerrarOT(id){
   const o=DB.ots.find(x=>x.id===id);const p=DB.planes.find(x=>x.id===o.planId);
   const tareas=(p?p.tareas:'').split('\n').filter(Boolean);
   modal_(`<h2>Completar ${o.num} – ${esc(eqN(o.equipoId))}</h2><p>${esc(o.descripcion)}</p>
-  <label><input type="checkbox" id="x_loto" style="width:auto"> <b>Lockout/Tagout aplicado y verificado</b></label>
   ${tareas.length?'<b>Checklist</b>'+tareas.map((t,i)=>`<label><input type="checkbox" class="chk" style="width:auto" data-t="${esc(t)}"> ${esc(t)}</label>`).join(''):''}
   <div class="grid"><label>Realizado por<input id="x_tec" value="${esc(U.nombre)}"></label>
   <label>Fecha realizada<input type="date" id="x_f" value="${hoy()}"></label><label>Horas de labor<input type="number" step="0.25" id="x_h" value="1"></label>
@@ -288,10 +319,9 @@ function cerrarOT(id){
   <div class="row"><button class="btn v" onclick="guardaCierre('${id}')">✔ Completar OT</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
 }
 function guardaCierre(id){
-  if(!x_loto.checked) return alert('Debe confirmar Lockout/Tagout antes de completar.');
   const o=DB.ots.find(x=>x.id===id);
   const chk=[...document.querySelectorAll('.chk')].map(c=>(c.checked?'✔ ':'✘ ')+c.dataset.t);
-  Object.assign(o,{estado:'Completada',tecnico:x_tec.value,cierre:x_f.value,horas:+x_h.value,resultado:x_res.value,repuestos:x_rep.value,costo:+x_cost.value||0,loto:'Sí',notas:x_n.value,checklist:chk,cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString()});
+  Object.assign(o,{estado:'Completada',tecnico:x_tec.value,cierre:x_f.value,horas:+x_h.value,resultado:x_res.value,repuestos:x_rep.value,costo:+x_cost.value||0,notas:x_n.value,checklist:chk,cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString()});
   const p=DB.planes.find(x=>x.id===o.planId);if(p) p.ultima=x_f.value;
   if(o.resultado==='Requiere seguimiento') DB.ots.push({id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:o.equipoId,tipo:'CM',descripcion:'Seguimiento de '+o.num+': '+o.notas,crew:o.crew,inicio:hoy(),fin:addDias(hoy(),3),estado:'Abierta',asignado:'',creada:new Date().toLocaleString()});
   audit(`Completó ${o.num} (${eqN(o.equipoId)}) – técnico: ${o.tecnico}`);generarOTs();save();cerrar();go(vista);
@@ -496,17 +526,15 @@ function nuevoReg(){
   <label>Resultado<select id="n_res"><option>OK – Sin hallazgos</option><option>OK – Con ajustes</option><option>Requiere seguimiento</option></select></label>
   <label>Costo repuestos ($)<input type="number" step="0.01" min="0" id="n_c" value="0"></label></div>
   <label>Descripción del trabajo<input id="n_d"></label><label>Repuestos usados<input id="n_r"></label><label>Notas / hallazgos<textarea id="n_n" rows="3"></textarea></label>
-  <label><input type="checkbox" id="n_loto" style="width:auto"> <b>Lockout/Tagout aplicado y verificado</b></label>
   <div class="row"><button class="btn v" onclick="guardaReg()">Guardar registro</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
 }
 function guardaReg(){
   if(!n_d.value.trim()) return alert('Escriba la descripción del trabajo');
   if(!n_tec.value.trim()) return alert('Escriba el técnico');
   if(n_f.value>hoy()) return alert('La fecha no puede ser futura');
-  if(!n_loto.checked) return alert('Debe confirmar Lockout/Tagout.');
   const o={id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:n_eq.value,tipo:n_ti.value,descripcion:n_d.value.trim(),crew:n_cr.value,inicio:n_f.value,fin:n_f.value,
    estado:'Completada',asignado:'',creada:new Date().toLocaleString(),tecnico:n_tec.value.trim(),cierre:n_f.value,horas:+n_h.value||0,resultado:n_res.value,
-   repuestos:n_r.value,costo:+n_c.value||0,notas:n_n.value,loto:'Sí',checklist:[],cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString(),manual:true};
+   repuestos:n_r.value,costo:+n_c.value||0,notas:n_n.value,checklist:[],cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString(),manual:true};
   DB.ots.push(o);audit(`Registro manual ${o.num} (${eqN(o.equipoId)}) – técnico: ${o.tecnico}`);save();cerrar();R.bd();
 }
 /* ---- Panel del motor de base de datos ---- */
@@ -589,8 +617,8 @@ function exportXLSX(){
   const l=document.getElementById('b_d')?filtroRegs():regs();
   const eqC=id=>(eqO(id).codigo||'');
   const hojas=[
-   {n:'Registros',w:[12,12,16,32,8,40,11,22,8,10,22,26,12,40,18],rows:[['N° Registro','Fecha','Código Equipo','Equipo','Tipo','Descripción del trabajo','Crew','Técnico','Horas','LOTO aplicado','Resultado','Repuestos usados','Costo repuestos ($)','Hallazgos / Notas','Registrado por'],
-     ...l.map(o=>[o.num,o.cierre,eqC(o.equipoId),eqN(o.equipoId),o.tipo,o.descripcion,o.crew,o.tecnico,+o.horas||0,o.loto||'Sí',o.resultado,o.repuestos||'',+o.costo||0,o.notas||'',o.cerradoPor||''])]},
+   {n:'Registros',w:[12,12,16,32,8,40,11,22,8,22,26,12,40,18],rows:[['N° Registro','Fecha','Código Equipo','Equipo','Tipo','Descripción del trabajo','Crew','Técnico','Horas','Resultado','Repuestos usados','Costo repuestos ($)','Hallazgos / Notas','Registrado por'],
+     ...l.map(o=>[o.num,o.cierre,eqC(o.equipoId),eqN(o.equipoId),o.tipo,o.descripcion,o.crew,o.tecnico,+o.horas||0,o.resultado,o.repuestos||'',+o.costo||0,o.notas||'',o.cerradoPor||''])]},
    {n:'Equipos',w:[16,36,22,32,14,14,10,10,18],rows:[['Código','Nombre','Tipo','Ubicación','Marca','Serie','Prioridad','Status','Estado'],...DB.equipos.map(e=>[e.codigo,e.nombre,e.tipo,e.ubicacion,e.marca,e.serie,e.prioridad,e.status,e.estado])]},
    {n:'Planes_PM',w:[16,34,48,12,12,14,14,12],rows:[['Código Equipo','Equipo','Descripción PM','Frecuencia (días)','Crew','Última realización','Próximo PM','Activo'],...DB.planes.map(p=>[eqC(p.equipoId),eqN(p.equipoId),p.descripcion,p.frecuencia,p.crew,p.ultima,prox(p),p.activo?'Sí':'No'])]},
    {n:'OT_Abiertas',w:[10,16,32,40,8,11,12,12,12],rows:[['OT','Código Equipo','Equipo','Descripción','Tipo','Crew','Inicio','Límite','Estado'],...DB.ots.filter(o=>o.estado!=='Completada').map(o=>[o.num,eqC(o.equipoId),eqN(o.equipoId),o.descripcion,o.tipo,o.crew,o.inicio,o.fin,o.estado])]}];
