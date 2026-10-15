@@ -4,57 +4,26 @@ title Instalador ManteniPro
 setlocal
 set "SRC=%~dp0"
 set "DEST=%LOCALAPPDATA%\ManteniPro"
-
 echo ==========================================
-echo    INSTALADOR - ManteniPro
-echo    Mantenimiento de Equipos
+echo    INSTALADOR - ManteniPro v2.0
+echo    Ferreteria Quilvio
 echo ==========================================
-echo.
-
-REM 1. Verificar que se ejecuta desde la carpeta extraida (no dentro del ZIP)
 if not exist "%SRC%index.html" (
-  echo [ERROR] No se encontro index.html junto a este instalador.
-  echo Extraiga primero el ZIP: clic derecho ^> Extraer todo,
-  echo y ejecute INSTALAR.bat desde la carpeta extraida.
+  echo [ERROR] Extraiga primero el ZIP y ejecute INSTALAR.bat desde la carpeta extraida.
   pause
   exit /b 1
 )
-
-REM 2. Copiar archivos
-echo [1/4] Copiando archivos a %DEST% ...
+echo [1/3] Copiando archivos a %DEST% ...
 if not exist "%DEST%" mkdir "%DEST%"
 xcopy "%SRC%*" "%DEST%\" /E /I /Y /Q >nul
-if errorlevel 1 (
-  echo [ERROR] No se pudieron copiar los archivos.
-  pause
-  exit /b 1
-)
-
-REM 3. Acceso directo en el Escritorio
-echo [2/4] Creando acceso directo en el Escritorio ...
+echo [2/3] Creando accesos directos ...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
  "$w=New-Object -ComObject WScript.Shell;" ^
- "$s=$w.CreateShortcut([Environment]::GetFolderPath('Desktop')+'\ManteniPro.lnk');" ^
- "$s.TargetPath='%DEST%\index.html';$s.IconLocation='%DEST%\icons\ManteniPro.ico';$s.Description='ManteniPro - Mantenimiento de Equipos';$s.Save()"
-
-REM 4. Acceso directo en el Menu Inicio
-echo [3/4] Agregando al Menu Inicio ...
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
- "$w=New-Object -ComObject WScript.Shell;" ^
- "$s=$w.CreateShortcut([Environment]::GetFolderPath('Programs')+'\ManteniPro.lnk');" ^
- "$s.TargetPath='%DEST%\index.html';$s.IconLocation='%DEST%\icons\ManteniPro.ico';$s.Save()"
-
-REM 5. Verificacion
-echo [4/4] Verificando instalacion ...
-if exist "%DEST%\index.html" (echo     OK  Programa instalado) else (echo     FALLA Programa)
-if exist "%USERPROFILE%\Desktop\ManteniPro.lnk" (echo     OK  Acceso directo Escritorio) else (echo     AVISO Acceso directo no encontrado ^(Escritorio en OneDrive^)?)
-
+ "foreach($d in @([Environment]::GetFolderPath('Desktop'),[Environment]::GetFolderPath('Programs'))){$s=$w.CreateShortcut($d+'\ManteniPro.lnk');$s.TargetPath='%DEST%\index.html';$s.IconLocation='%DEST%\icons\ManteniPro.ico';$s.Description='ManteniPro - Ferreteria Quilvio';$s.Save()}"
+echo [3/3] Verificando ...
+if exist "%DEST%\index.html" (echo     OK  Programa instalado) else (echo     FALLA)
 echo.
-echo ==========================================
-echo  Instalacion terminada.
-echo  Usuario: admin    Contrasena: admin123
-echo  Cambie la contrasena en Usuarios.
-echo ==========================================
+echo  Abra ManteniPro e ingrese la URL y clave de Supabase (ver LEEME.txt).
 start "" "%DEST%\index.html"
 pause
 endlocal

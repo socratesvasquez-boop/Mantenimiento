@@ -1,5 +1,5 @@
 @echo off
-echo Haga un RESPALDO desde ManteniPro antes de continuar.
+echo Sus datos estan en la nube y NO se borran al desinstalar.
 pause
 rmdir /S /Q "%LOCALAPPDATA%\ManteniPro"
 del "%USERPROFILE%\Desktop\ManteniPro.lnk" 2>nul

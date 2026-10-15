@@ -6,17 +6,18 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="theme-color" content="#0b3d91">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
-<title>Ferretería Quilvio – ManteniPro v1.8.0</title>
+<meta name="theme-color" content="#0b3d91">
+<title>Ferretería Quilvio – ManteniPro v2.1.0</title>
 <style>
 :root{--azul:#0b3d91;--azul2:#1565c0;--rojo:#c62828;--ama:#f9a825;--verde:#2e7d32;--gris:#f3f5f9;--borde:#d5dbe5}
 *{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--gris);color:#1d2433}
-header{background:var(--azul);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header{background:var(--azul);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 header h1{font-size:18px;margin:0;flex:1;display:flex;align-items:center;gap:10px}
+#who{font-size:13px;opacity:.9}
 #hdrLogo{height:40px;width:40px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}
 .empresa{display:flex;flex-direction:column;line-height:1.15}.empresa b{font-size:18px}.empresa small{font-size:12px;opacity:.85;font-weight:normal}
-#loginLogo{display:block;margin:0 auto 10px;max-width:200px;max-height:220px}header span{font-size:13px;opacity:.9}
+#loginLogo{display:block;margin:0 auto 10px;max-width:200px;max-height:220px}
 nav{display:flex;gap:4px;flex-wrap:wrap;background:#fff;padding:6px 10px;border-bottom:1px solid var(--borde)}
 nav button{background:none;border:none;padding:8px 12px;cursor:pointer;border-radius:6px;font-size:14px}
 nav button.act{background:var(--azul2);color:#fff}
@@ -28,175 +29,405 @@ main{padding:16px;max-width:1300px;margin:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:7px;border-bottom:1px solid var(--borde);text-align:left;vertical-align:top}
 th{background:#e8edf6;position:sticky;top:0}.tw{overflow:auto;max-height:520px}
 .tag{padding:2px 8px;border-radius:10px;font-size:12px;color:#fff;white-space:nowrap}
-.t-r{background:var(--rojo)}.t-a{background:var(--ama);color:#000}.t-v{background:var(--verde)}.t-g{background:#78849e}.t-b{background:var(--azul2)}.st-Bajo{background:var(--verde)}.st-Medio{background:var(--ama);color:#000}.st-Alto{background:var(--rojo)}
+.t-r{background:var(--rojo)}.t-a{background:var(--ama);color:#000}.t-v{background:var(--verde)}.t-g{background:#78849e}.t-b{background:var(--azul2)}
+.st-Bajo{background:var(--verde)}.st-Medio{background:var(--ama);color:#000}.st-Alto{background:var(--rojo)}
 input,select,textarea{padding:7px;border:1px solid var(--borde);border-radius:6px;font-size:14px;width:100%}
 label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
 .btn{background:var(--azul2);color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px}
+.btn:disabled{opacity:.6;cursor:wait}
 .btn.s{background:#fff;color:var(--azul2);border:1px solid var(--azul2)}.btn.r{background:var(--rojo)}.btn.v{background:var(--verde)}.btn.sm{padding:4px 8px;font-size:12px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-#login{max-width:360px;margin:80px auto}
+#login{max-width:380px;margin:60px auto}
 .modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:9;padding:10px}
 .modal .card{width:100%;max-width:620px;max-height:92vh;overflow:auto}
-.hide{display:none}h2{margin:4px 0 12px;font-size:18px}
+.hide{display:none!important}h2{margin:4px 0 12px;font-size:18px}
+#nubeB{font-size:12px}
 .alerta-v{border:4px solid var(--rojo);animation:pop .25s ease-out,parpadeo 2s ease-in-out .25s infinite}
 .alerta-v h2{animation:parpadeoTxt 2s ease-in-out infinite}
-@keyframes parpadeo{0%,100%{border-color:var(--rojo);box-shadow:0 0 0 0 rgba(198,40,40,.0);background:#fff}
- 50%{border-color:#ff5252;box-shadow:0 0 28px 8px rgba(198,40,40,.75);background:#ffebee}}
-@keyframes parpadeoTxt{0%,100%{opacity:1}50%{opacity:.35}}
-@media (prefers-reduced-motion:reduce){.alerta-v,.alerta-v h2{animation:none}}
 @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes parpadeo{0%,100%{border-color:var(--rojo);box-shadow:0 0 0 0 rgba(198,40,40,0);background:#fff}50%{border-color:#ff5252;box-shadow:0 0 28px 8px rgba(198,40,40,.75);background:#ffebee}}
+@keyframes parpadeoTxt{0%,100%{opacity:1}50%{opacity:.35}}
 #bellV{animation:parpadeoTxt 2s ease-in-out infinite;background:var(--rojo);color:#fff;border:none;border-radius:14px;padding:3px 10px;cursor:pointer;font-weight:bold;display:none}
+@media (prefers-reduced-motion:reduce){.alerta-v,.alerta-v h2,#bellV{animation:none}}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:10px 18px;border-radius:8px;z-index:99;font-size:14px;box-shadow:0 4px 12px #0004;display:none}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login" class="card">
-  <img id="loginLogo" src="" alt="Ferretería Quilvio">
+  <img id="loginLogo" alt="Ferretería Quilvio">
   <h2 style="text-align:center">ManteniPro – Mantenimiento de Equipos</h2>
-  <label>Usuario<input id="lu" autocomplete="username"></label>
-  <label>Contraseña<input id="lp" type="password" autocomplete="current-password"></label>
-  <button class="btn" onclick="login()">Entrar</button>
-  <p style="font-size:12px;color:#777">Primer uso: <b>admin</b> / <b>admin123</b> (el sistema le pedirá cambiarla)</p>
+  <div id="cfgBox" class="hide">
+    <p style="font-size:13px">☁️ Conecte el programa a su base de datos en la nube (Supabase). Se hace una sola vez en cada equipo.</p>
+    <label>URL del proyecto<input id="cfUrl" placeholder="https://xxxxxxxx.supabase.co" autocomplete="off"></label>
+    <label>Clave pública (anon / publishable key)<input id="cfKey" autocomplete="off"></label>
+    <button class="btn" onclick="guardarCfg()">Conectar</button>
+  </div>
+  <div id="loginBox" class="hide">
+    <label>Correo<input id="lu" type="email" autocomplete="username"></label>
+    <label>Contraseña<input id="lp" type="password" autocomplete="current-password"></label>
+    <button class="btn" id="btnEntrar" onclick="login()">Entrar</button>
+    <p style="font-size:12px;color:#777">☁️ Base de datos en la nube · <a href="#" onclick="verCfg();return false">Cambiar conexión</a></p>
+  </div>
+  <p id="loginMsg" style="font-size:13px;color:var(--rojo)"></p>
 </div>
 
 <div id="app" class="hide">
-<header><h1><img id="hdrLogo" src="" alt="Logo"><span class="empresa"><b id="hdrEmpresa">Ferretería Quilvio</b><small>ManteniPro – Mantenimiento de Equipos · v1.8.0</small></span></h1><button id="bellV" title="Mantenimientos vencidos" onclick="popupVencidos(true)"></button><span id="who"></span><button class="btn s sm" onclick="cambiarPass(false)">🔑 Mi contraseña</button><button class="btn s sm" onclick="logout()">Salir</button></header>
+<header><h1><img id="hdrLogo" alt="Logo"><span class="empresa"><b id="hdrEmpresa">Ferretería Quilvio</b><small>ManteniPro – Mantenimiento de Equipos · v2.1.0</small></span></h1>
+<span id="nubeB" class="tag"></span><button id="bellV" title="Mantenimientos vencidos" onclick="popupVencidos(true)"></button>
+<span id="who"></span><button class="btn s sm" onclick="miCuenta()">👤 Mi cuenta</button><button class="btn s sm" onclick="logout()">Salir</button></header>
 <nav id="nav"></nav>
 <main id="main"></main>
 </div>
 
 <div class="modal" id="modal"><div class="card" id="mbody"></div></div>
+<div id="toast"></div>
 
 <script>
-/* ===================== DATOS ===================== */
-const K='mantenipro_v1';
-let DB=null;
-const hoy=()=>new Date().toISOString().slice(0,10);
-const addDias=(f,d)=>{const x=new Date(f+'T00:00:00');x.setDate(x.getDate()+d);return x.toISOString().slice(0,10)};
-const diff=f=>Math.round((new Date(f+'T00:00:00')-new Date(hoy()+'T00:00:00'))/864e5);
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-/* ===== BASE DE DATOS INTERNA (IndexedDB) ===== */
-const DBNAME='ManteniProDB',TABLAS=['equipos','planes','ots','usuarios','log','config'];
-let IDB=null,ULTIMO_GUARDADO='';
-function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open(DBNAME,1);
-  r.onupgradeneeded=()=>{const d=r.result;
-    ['equipos','planes','ots','usuarios'].forEach(t=>{if(!d.objectStoreNames.contains(t))d.createObjectStore(t,{keyPath:'id'})});
-    if(!d.objectStoreNames.contains('log'))d.createObjectStore('log');
-    if(!d.objectStoreNames.contains('config'))d.createObjectStore('config',{keyPath:'k'});
-    d.objectStoreNames.contains('ots')&&r.transaction.objectStore('ots').createIndex('equipoId','equipoId');};
-  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej('bloqueada')})}
-async function idbLoad(){
-  IDB=await idbOpen();const tx=IDB.transaction(TABLAS,'readonly');
-  const g=t=>new Promise((r,j)=>{const q=tx.objectStore(t).getAll();q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)});
-  const [equipos,planes,ots,usuarios,log,config]=await Promise.all(TABLAS.map(g));
-  if(!usuarios.length) return null;
-  const cf=Object.fromEntries(config.map(x=>[x.k,x.v]));ULTIMO_GUARDADO=cf.guardado||'';
-  return {equipos,planes,ots,usuarios,log,seq:cf.seq||1000,wa:cf.wa||undefined,logo:cf.logo||undefined,empresa:cf.empresa||undefined};
-}
-function save(){
-  if(!IDB){try{localStorage.setItem(K,JSON.stringify(DB));return Promise.resolve(true)}catch(e){alert('No se pudo guardar: '+e);return Promise.resolve(false)}}
-  const tx=IDB.transaction(TABLAS,'readwrite');
-  ['equipos','planes','ots','usuarios'].forEach(t=>{const st=tx.objectStore(t);st.clear();DB[t].forEach(x=>st.put(x))});
-  const l=tx.objectStore('log');l.clear();DB.log.forEach((x,i)=>l.put(x,i));
-  ULTIMO_GUARDADO=new Date().toLocaleString();
-  const c=tx.objectStore('config');c.put({k:'seq',v:DB.seq});c.put({k:'logo',v:DB.logo||null});c.put({k:'empresa',v:DB.empresa||null});c.put({k:'wa',v:DB.wa||null});c.put({k:'guardado',v:ULTIMO_GUARDADO});
-  return new Promise(res=>{tx.oncomplete=()=>res(true);tx.onerror=()=>{alert('Error al guardar en la base de datos: '+tx.error);res(false)}});
-}
-function borrarBD(){
-  if(!confirm('¿Borrar TODA la base de datos y reiniciar? Haga un respaldo antes.'))return;
-  if(IDB)IDB.close();const r=indexedDB.deleteDatabase(DBNAME);
-  const fin=()=>{localStorage.removeItem(K);sessionStorage.clear();location.reload()};r.onsuccess=fin;r.onerror=fin;r.onblocked=fin;
-}
-const listo=(async()=>{
-  try{DB=await idbLoad()}catch(e){IDB=null;console.warn('IndexedDB no disponible, se usa localStorage',e)}
-  let migrado=false;
-  if(!DB){const old=localStorage.getItem(K);if(old){DB=JSON.parse(old);migrado=true}}
-  if(!DB){await seed()}
-  addBaterias();DB.equipos.forEach(e=>{if(!e.status)e.status='Bajo'});
-  if(migrado&&IDB){DB.log.unshift({f:new Date().toLocaleString(),u:'Sistema',a:'Datos migrados a la base de datos interna (IndexedDB)'});
-    localStorage.setItem(K+'_respaldo_migracion',localStorage.getItem(K));localStorage.removeItem(K)}
-  save();
-  try{navigator.storage&&navigator.storage.persist&&await navigator.storage.persist()}catch(e){}
-})();
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-async function hash(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+/* =====================================================================
+   ManteniPro v2.0.0 – Ferretería Quilvio
+   Un solo usuario · Base de datos en la nube (Supabase)
+   ===================================================================== */
+const VERSION='2.1.0';
+/* Opcional: escriba aquí la URL y la clave pública para no tener que
+   configurarlas en cada equipo (por ejemplo, al publicar en GitHub Pages). */
+const NUBE_URL='';
+const NUBE_KEY='';
 
-async function seed(){
+const LOGO_FULL='data:image/png;base64,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';
+const LOGO_EMB='data:image/png;base64,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';
+
+let DB=null,U=null,vista='dash';
+
+/* ===================== UTILIDADES ===================== */
+const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const hoy=()=>fmt(new Date());
+const addDias=(f,n)=>{const x=new Date(f+'T00:00:00');x.setDate(x.getDate()+n);return fmt(x)};
+const diff=f=>Math.round((new Date(f+'T00:00:00')-new Date(hoy()+'T00:00:00'))/864e5);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clon=o=>JSON.parse(JSON.stringify(o));
+function toast(t,color){toastEl.textContent=t;toastEl.style.background=color||'#2e7d32';toastEl.style.display='block';clearTimeout(toastEl._t);toastEl._t=setTimeout(()=>toastEl.style.display='none',3500)}
+const toastEl=document.getElementById('toast');
+function modal_(h){const c=document.querySelector('#modal .card');c.classList.remove('alerta-v');c.style.maxWidth='';mbody.innerHTML=h;modal.style.display='flex'}
+function cerrar(){modal.style.display='none';if(PENDREF)setTimeout(refrescar,0)}
+function bajar(n,txt,t){const a=document.createElement('a');a.href=URL.createObjectURL(txt instanceof Blob?txt:new Blob([txt],{type:t}));a.download=n;a.click()}
+function reglaPass(p1,p2){
+  if(p1.length<8) return 'La contraseña debe tener al menos 8 caracteres.';
+  if(!/[A-Za-z]/.test(p1)||!/\d/.test(p1)) return 'La contraseña debe tener letras y números.';
+  if(p1!==p2) return 'Las contraseñas no coinciden.';
+  return '';
+}
+const ojo=id=>`<button type="button" class="btn sm s" style="margin-top:4px" onclick="${id}.type=${id}.type==='password'?'text':'password'">👁 Mostrar</button>`;
+
+/* ===================== DATOS INICIALES ===================== */
+const STATUS=['Bajo','Medio','Alto'];
+function addBaterias(d){
+  if(d.equipos.some(e=>e.codigo==='BATLVL1')) return;
+  const e={id:uid(),codigo:'BATLVL1',nombre:'Medidor de Nivel de Líquido de Baterías',tipo:'Instrumento – Baterías',ubicacion:'FLR – Cuarto de Carga de Baterías',prioridad:7,marca:'',serie:'',estado:'Operativo',status:'Bajo'};
+  d.equipos.push(e);
+  d.planes.push({id:uid(),equipoId:e.id,descripcion:'Inspección Nivel de Líquido (Electrolito) de Baterías – CRITICAL',frecuencia:7,crew:'EMT',activo:true,ultima:hoy(),
+   tareas:['EPP: careta, gafas y guantes resistentes a ácido','Verificar lavaojos/ducha de emergencia y ventilación del área','Batería completamente cargada antes de rellenar','Medir nivel en cada celda con el medidor','Nivel correcto: sobre las placas, sin pasar el indicador de llenado','Rellenar solo con agua destilada; no sobrellenar','Registrar celdas con nivel bajo y la densidad si aplica','Revisar corrosión, fugas y conexiones','Verificar calibración/funcionamiento del medidor'].join('\n')});
+}
+function seed(){
   const eq=[['CAPPER1','Capper 1','Capper','FLR – Línea Llenado',2],['CAPPER2','Capper 2','Capper','FLR – Línea Llenado',2],
    ['SPINSCAN1','Spin Scan 1','Spin Scan','FLR – Inspección',2],['WS9','Wrap Seal 9','Wrap Seal','FLR – Empaque',7],
    ['BOTTLEHOPPER1','Bottle Hopper 1 (120cc)','Bottle Hopper','FLR – Alimentación',7],['ETCHER1','Etcher Station 1','Etcher','FLR – Etiquetado',2],
    ['INSPECT1','Inspect Station 1','Cámara Cognex','FLR – Inspección',2],['MAILSORTER','Mail Sorter','Sorter','FLR – Envíos',7],
    ['ROBOT1','Robot Omron Viper 650','Robot','FLR – Celda 1',7],['PCM1','Pallet Conveyor Motors HVF 7-9','Conveyor','FLR – HVF',7]];
-  DB={equipos:[],planes:[],ots:[],usuarios:[],log:[],seq:1000};
-  eq.forEach(([cod,n,t,u,p])=>DB.equipos.push({id:uid(),codigo:cod,nombre:n,tipo:t,ubicacion:u,prioridad:p,marca:'',serie:'',estado:'Operativo',status:'Bajo'}));
+  const d={equipos:[],planes:[],ots:[],log:[],seq:1000,perfil:{nombre:''},empresa:'Ferretería Quilvio'};
+  eq.forEach(([cod,n,t,u,p])=>d.equipos.push({id:uid(),codigo:cod,nombre:n,tipo:t,ubicacion:u,prioridad:p,marca:'',serie:'',estado:'Operativo',status:'Bajo'}));
   const pl=[[0,'Capper Clean',14,'EMT','Limpieza general\nRevisar cabezales\nVerificar torque'],[1,'Capper Clean',14,'EMT','Limpieza general\nRevisar cabezales\nVerificar torque'],
    [2,'Spin Scan PM',14,'EMT','Limpiar lentes\nVerificar lectura\nRevisar rodillos'],[3,'Wrap Seal Quarterly – CRITICAL',90,'EMT','Inspeccionar fold tool\nRevisar vacío\nLimpiar sellador'],
    [4,'Bottle Hopper PM – CRITICAL',14,'EMT','Revisar alimentación\nLimpiar tolva\nVerificar sensores'],[5,'Etcher Maintenance',14,'EMT','Limpiar óptica\nRevisar extracción'],
    [6,'Inspección Cámara Cognex',30,'CONTROL','Limpiar lente\nVerificar iluminación\nRespaldo de job'],[7,'End of Shift Inspection',1,'CONTROL','Inspección visual\nRevisar atascos'],
    [8,'Robot PM / Calibración',180,'CONTROL','Respaldo de programa\nVerificar calibración\nRevisar cables y grasa'],[9,'Motor/LTU/Belt Monthly – CRITICAL',30,'EMT','Revisar motores\nTensión de bandas\nRuido/vibración']];
-  pl.forEach(([i,d,f,c,t])=>DB.planes.push({id:uid(),equipoId:DB.equipos[i].id,descripcion:d,frecuencia:f,crew:c,tareas:t,ultima:addDias(hoy(),-f+((i%4)-1)*3),activo:true}));
-  DB.usuarios.push({id:uid(),usuario:'admin',nombre:'Administrador',rol:'Admin',pass:await hash('admin123'),activo:true,debeCambiar:true,creado:hoy()});
-  save();
+  pl.forEach(([i,de,f,c,t])=>d.planes.push({id:uid(),equipoId:d.equipos[i].id,descripcion:de,frecuencia:f,crew:c,tareas:t,ultima:addDias(hoy(),-f+((i%4)-1)*3),activo:true}));
+  addBaterias(d);d.batAgregado=true;
+  return d;
+}
+/* Acepta datos de versiones anteriores (respaldos JSON, base local) */
+function normalizar(d){
+  d=d||{};
+  ['equipos','planes','ots','log'].forEach(t=>{if(!Array.isArray(d[t]))d[t]=[]});
+  d.equipos.forEach(e=>{if(!e.status)e.status='Bajo'});
+  d.log.forEach(l=>{if(!l.id)l.id=uid()});
+  if(!d.perfil)d.perfil={nombre:''};
+  if(!d.empresa)d.empresa='Ferretería Quilvio';
+  delete d.usuarios;
+  if(!d.batAgregado){addBaterias(d);d.batAgregado=true}
+  d.seq=Math.max(d.seq||1000,...d.ots.map(o=>parseInt(String(o.num).replace(/\D/g,''))||0));
+  return d;
 }
 
-/* ===================== LOGO / EMPRESA ===================== */
-const LOGO_FULL='data:image/png;base64,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';
-const LOGO_EMB='data:image/png;base64,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';
+/* ===================== NUBE (Supabase) ===================== */
+function CFG(){const c=JSON.parse(localStorage.getItem('mp_nube')||'{}');return {url:(NUBE_URL||c.url||'').trim().replace(/\/+$/,''),key:(NUBE_KEY||c.key||'').trim()}}
+let SES=JSON.parse(localStorage.getItem('mp_ses')||'null');
+let VER=0,BASE=null,SUCIO=false,SUBIENDO=false,TIMER=null,REINT=null,ESPERA=[],COLA=Promise.resolve(),ESTADO='ok',PENDREF=false;
+
+async function sb(path,opt={},auth=true){
+  const c=CFG(),h={apikey:c.key,'Content-Type':'application/json',...(opt.headers||{})};
+  const hacer=async()=>{if(auth){await asegurarToken();h.Authorization='Bearer '+SES.access_token}return fetch(c.url+path,{...opt,headers:h,cache:'no-store'})};
+  let r=await hacer();
+  if(r.status===401&&auth&&SES){await refrescarToken();r=await hacer()}
+  if(!r.ok){let m='';try{const j=await r.json();m=j.error_description||j.msg||j.message||j.error||''}catch(e){}
+    const err=new Error(m||('HTTP '+r.status));err.status=r.status;throw err}
+  if(r.status===204)return null;
+  const t=await r.text();return t?JSON.parse(t):null;
+}
+function guardarSes(j){
+  SES={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()+(j.expires_in||3600)*1000,
+       uid:(j.user&&j.user.id)||(SES&&SES.uid),email:(j.user&&j.user.email)||(SES&&SES.email)};
+  localStorage.setItem('mp_ses',JSON.stringify(SES));
+}
+async function asegurarToken(){if(!SES)throw Object.assign(new Error('Sin sesión'),{status:401});if(Date.now()>SES.expires_at-60000)await refrescarToken()}
+let REFP=null;
+function refrescarToken(){
+  if(!REFP)REFP=sb('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:SES.refresh_token})},false)
+    .then(guardarSes).finally(()=>REFP=null);
+  return REFP;
+}
+const cargarNube=async()=>(await sb('/rest/v1/manteni?select=data,version,updated_at&user_id=eq.'+SES.uid))[0]||null;
+function cacheLocal(){try{localStorage.setItem('mp_cache_'+SES.uid,JSON.stringify({data:DB,ver:VER,base:BASE,sucio:SUCIO}))}catch(e){console.warn('cache',e)}}
+
+function estadoNube(s){
+  ESTADO=s;const b=document.getElementById('nubeB');if(!b)return;
+  const m={ok:['t-v','☁️ Guardado en la nube'],pend:['t-a','⏳ Guardando…'],off:['t-r','🔴 Sin conexión – se guardará al reconectar']}[s];
+  b.className='tag '+m[0];b.textContent=m[1];
+  b.title=s==='ok'?'Última sincronización: '+new Date().toLocaleTimeString():'';
+}
+/* Guardado: se agrupan los cambios y se suben a la nube */
+function save(){
+  if(!SES||!DB)return Promise.resolve(false);
+  SUCIO=true;cacheLocal();estadoNube('pend');clearTimeout(TIMER);
+  return new Promise(res=>{ESPERA.push(res);TIMER=setTimeout(()=>{const w=ESPERA;ESPERA=[];COLA=COLA.then(subir).then(ok=>w.forEach(f=>f(ok)))},500)});
+}
+async function subir(){
+  if(!SUCIO||!SES)return true;
+  SUBIENDO=true;SUCIO=false;const enviado=clon(DB),ahora=new Date().toISOString();
+  try{
+    let r=await sb(`/rest/v1/manteni?user_id=eq.${SES.uid}&version=eq.${VER}`,{method:'PATCH',headers:{Prefer:'return=representation'},
+      body:JSON.stringify({data:enviado,version:VER+1,updated_at:ahora})});
+    if(r&&r.length){VER++;BASE=enviado;espejo(enviado)}
+    else{
+      const n=await cargarNube();
+      if(!n){
+        await sb('/rest/v1/manteni',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({user_id:SES.uid,data:enviado,version:1,updated_at:ahora})});
+        VER=1;BASE=enviado;espejo(enviado);
+      }else{
+        /* Otro dispositivo guardó antes: se combinan los cambios */
+        const f=fusionar(normalizar(n.data),enviado,BASE||{equipos:[],planes:[],ots:[],log:[]});
+        r=await sb(`/rest/v1/manteni?user_id=eq.${SES.uid}&version=eq.${n.version}`,{method:'PATCH',headers:{Prefer:'return=representation'},
+          body:JSON.stringify({data:f,version:n.version+1,updated_at:ahora})});
+        if(!r||!r.length)throw Object.assign(new Error('conflicto'),{status:409});
+        VER=n.version+1;espejo(f);
+        DB=fusionar(f,DB,enviado);BASE=f;
+        if(JSON.stringify(DB)!==JSON.stringify(f))SUCIO=true;
+        aplicarLogo();refrescar();
+      }
+    }
+    cacheLocal();SUBIENDO=false;
+    if(SUCIO)save();else estadoNube('ok');
+    return true;
+  }catch(e){
+    console.warn('No se pudo guardar en la nube',e);
+    SUCIO=true;SUBIENDO=false;cacheLocal();estadoNube('off');
+    if(e.status===401||e.status===400&&/refresh/i.test(e.message)){toast('La sesión expiró. Vuelva a iniciar sesión.','#c62828')}
+    clearTimeout(REINT);REINT=setTimeout(()=>{if(SUCIO)save()},15000);
+    return false;
+  }
+}
+/* Combina: datos remotos + cambios locales hechos desde la última sincronización (base) */
+function fusionar(rem,loc,base){
+  const out=clon(rem);
+  ['equipos','planes','ots'].forEach(t=>{
+    const b=Object.fromEntries((base[t]||[]).map(x=>[x.id,JSON.stringify(x)])),l=new Set(loc[t].map(x=>x.id));
+    loc[t].forEach(x=>{if(b[x.id]!==JSON.stringify(x)){const i=out[t].findIndex(y=>y.id===x.id);if(i>=0)out[t][i]=clon(x);else out[t].push(clon(x))}});
+    Object.keys(b).forEach(id=>{if(!l.has(id))out[t]=out[t].filter(y=>y.id!==id)});
+  });
+  const ids=new Set(out.log.map(x=>x.id)),bl=new Set((base.log||[]).map(x=>x.id));
+  out.log=loc.log.filter(x=>!ids.has(x.id)&&!bl.has(x.id)).concat(out.log).slice(0,3000);
+  ['wa','logo','empresa','perfil'].forEach(k=>{if(JSON.stringify(loc[k])!==JSON.stringify(base[k]))out[k]=clon(loc[k]??null)});
+  /* Una sola OT abierta por plan PM */
+  const remIds=new Set(rem.ots.map(o=>o.id)),vistos={};
+  out.ots=out.ots.filter(o=>{if(!o.planId||o.estado==='Completada')return true;
+    if(vistos[o.planId]){return !remIds.has(o.id)?false:true}vistos[o.planId]=1;return true});
+  /* Números de OT únicos */
+  let mx=Math.max(1000,...out.ots.map(o=>parseInt(String(o.num).replace(/\D/g,''))||0));const usados=new Set();
+  out.ots.forEach(o=>{if(usados.has(o.num))o.num='F'+(++mx);usados.add(o.num)});
+  out.seq=Math.max(mx,out.seq||0,loc.seq||0);
+  return out;
+}
+/* Revisa si otro dispositivo cambió los datos */
+async function revisarNube(){
+  if(!SES||!DB||SUCIO||SUBIENDO)return;
+  try{
+    const r=await sb('/rest/v1/manteni?select=version&user_id=eq.'+SES.uid);
+    if(r[0]&&r[0].version>VER){
+      const n=await cargarNube();if(SUCIO||SUBIENDO||!n)return;
+      DB=normalizar(n.data);VER=n.version;BASE=clon(DB);cacheLocal();aplicarLogo();
+      if(U)U.nombre=DB.perfil.nombre||SES.email.split('@')[0];
+      refrescar();toast('🔄 Datos actualizados desde otro dispositivo','#1565c0');
+    }
+    if(ESTADO!=='ok'&&!SUCIO)estadoNube('ok');
+  }catch(e){estadoNube('off')}
+}
+function refrescar(){
+  if(!U||document.getElementById('app').classList.contains('hide'))return;
+  const ae=document.activeElement;
+  if(modal.style.display==='flex'||(ae&&main.contains(ae)&&/INPUT|SELECT|TEXTAREA/.test(ae.tagName))){PENDREF=true;bellVenc();return}
+  PENDREF=false;who.textContent=U.nombre;const y=window.scrollY;go(vista);window.scrollTo(0,y);
+}
+/* Datos de versiones anteriores guardados en este equipo (para subirlos la primera vez) */
+async function datosLocalesAntiguos(){
+  try{
+    const d=await new Promise((res)=>{const r=indexedDB.open('ManteniProDB');r.onerror=()=>res(null);
+      r.onsuccess=()=>{const db=r.result;if(!db.objectStoreNames.contains('equipos')){db.close();return res(null)}
+        const ts=['equipos','planes','ots','log','config'].filter(t=>db.objectStoreNames.contains(t)),tx=db.transaction(ts),o={};let n=0;
+        ts.forEach(t=>{const q=tx.objectStore(t).getAll();q.onsuccess=()=>{o[t]=q.result;if(++n===ts.length){db.close();res(o)}}})}});
+    if(d&&d.equipos&&d.equipos.length){const cf=Object.fromEntries((d.config||[]).map(x=>[x.k,x.v]));
+      return {equipos:d.equipos,planes:d.planes||[],ots:d.ots||[],log:d.log||[],seq:cf.seq,wa:cf.wa||undefined,logo:cf.logo||undefined,empresa:cf.empresa||undefined}}
+  }catch(e){}
+  const o=localStorage.getItem('mantenipro_v1');return o?JSON.parse(o):null;
+}
+async function abrirDatos(){
+  const cache=JSON.parse(localStorage.getItem('mp_cache_'+SES.uid)||'null');
+  let n;
+  try{await asegurarToken();n=await cargarNube()}
+  catch(e){
+    if((!e.status||e.status>=500)&&cache){DB=normalizar(cache.data);VER=cache.ver;BASE=cache.base||clon(DB);SUCIO=!!cache.sucio;estadoNube('off');
+      setTimeout(()=>save(),15000);return}
+    throw e;
+  }
+  if(cache&&cache.sucio&&cache.data){DB=normalizar(cache.data);VER=cache.ver;BASE=cache.base||clon(DB);estadoNube('pend');setTimeout(save,100)}
+  else if(n){DB=normalizar(n.data);VER=n.version;BASE=clon(DB);estadoNube('ok')}
+  else{
+    const local=await datosLocalesAntiguos();
+    DB=normalizar(local&&confirm('La base de datos en la nube está vacía.\n\n¿Subir los datos que ya tiene en ESTE equipo?\n\n(Cancelar = empezar con datos nuevos)')?local:seed());
+    DB.log.unshift({id:uid(),f:new Date().toLocaleString(),u:'Sistema',a:'Base de datos en la nube creada'});
+    await sb('/rest/v1/manteni',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({user_id:SES.uid,data:DB,version:1,updated_at:new Date().toISOString()})});
+    VER=1;BASE=clon(DB);estadoNube('ok');
+  }
+  cacheLocal();
+  if(ESTADO!=='off')espejo(DB);
+}
+
+/* ===================== TABLAS EN LA NUBE: EQUIPOS Y ÓRDENES =====================
+   Además del documento principal, cada equipo y cada orden de trabajo se guarda
+   como una fila en las tablas "equipos" y "ordenes" de Supabase (visibles en el
+   Table Editor, exportables a CSV/Excel y consultables con SQL). */
+let ESPEJO={ok:null,msg:'',ult:''},ESPQ=Promise.resolve();
+const fechaN=v=>/^\d{4}-\d{2}-\d{2}$/.test(v||'')?v:null;
+const numN=v=>{const n=parseFloat(v);return isFinite(n)?n:null};
+function filaEq(e){return {user_id:SES.uid,id:e.id,codigo:e.codigo||'',nombre:e.nombre||'',tipo:e.tipo||'',ubicacion:e.ubicacion||'',marca:e.marca||'',serie:e.serie||'',
+  prioridad:numN(e.prioridad),status:e.status||'',estado:e.estado||''}}
+function filaOT(o,d){const e=d.equipos.find(x=>x.id===o.equipoId)||{};
+  return {user_id:SES.uid,id:o.id,num:o.num||'',equipo_id:o.equipoId||'',equipo_codigo:e.codigo||'',equipo_nombre:e.nombre||'',tipo:o.tipo||'',descripcion:o.descripcion||'',
+  crew:o.crew||'',plan_id:o.planId||null,inicio:fechaN(o.inicio),fin:fechaN(o.fin),estado:o.estado||'',tecnico:o.tecnico||'',cierre:fechaN(o.cierre),
+  horas:numN(o.horas),resultado:o.resultado||'',repuestos:o.repuestos||'',costo:numN(o.costo),notas:o.notas||'',checklist:(o.checklist||[]).join('\n')}}
+function espejo(d,todo){if(!SES)return ESPQ;const c=clon(d);ESPQ=ESPQ.then(()=>espejoRun(c,todo)).catch(e=>console.warn(e));return ESPQ}
+async function espejoRun(d,todo){
+  const k='mp_mir_'+SES.uid,guard=localStorage.getItem(k);
+  if(!guard)todo=true;
+  const mir=todo?{equipos:{},ordenes:{}}:JSON.parse(guard);
+  const sets={equipos:d.equipos.map(filaEq),ordenes:d.ots.map(o=>filaOT(o,d))},ahora=new Date().toISOString();
+  try{
+    for(const t of ['equipos','ordenes']){
+      const cur={},up=[];
+      sets[t].forEach(f=>{const j=JSON.stringify(f);cur[f.id]=j;if(mir[t][f.id]!==j)up.push({...f,actualizado:ahora})});
+      if(todo)await sb(`/rest/v1/${t}?user_id=eq.${SES.uid}`,{method:'DELETE'});
+      else{const del=Object.keys(mir[t]).filter(id=>!cur[id]);
+        for(let i=0;i<del.length;i+=100)await sb(`/rest/v1/${t}?user_id=eq.${SES.uid}&id=in.(${del.slice(i,i+100).map(x=>encodeURIComponent('"'+x+'"')).join(',')})`,{method:'DELETE'})}
+      for(let i=0;i<up.length;i+=500)await sb(`/rest/v1/${t}?on_conflict=user_id,id`,{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(up.slice(i,i+500))});
+      mir[t]=cur;localStorage.setItem(k,JSON.stringify(mir));
+    }
+    ESPEJO={ok:true,msg:'',ult:new Date().toLocaleString()};
+  }catch(e){
+    ESPEJO={ok:false,ult:ESPEJO.ult,msg:(e.status===404||/PGRST205|does not exist|schema cache|relation/i.test(e.message))
+      ?'Faltan las tablas "equipos" y "ordenes" en Supabase. Ejecute de nuevo supabase_setup.sql (SQL Editor → Run).':(e.status?e.message:'Sin conexión')};
+    if(!e.status||e.status>=500){clearTimeout(espejo._t);espejo._t=setTimeout(()=>{if(DB&&SES)espejo(DB)},30000)}
+  }
+  if(typeof vista!=='undefined'&&vista==='bd'&&document.getElementById('b_tab')&&modal.style.display!=='flex')R.bd();
+}
+
+/* ===================== INICIO DE SESIÓN ===================== */
+function mostrarLogin(modo){
+  cfgBox.classList.toggle('hide',modo!=='cfg');loginBox.classList.toggle('hide',modo!=='login');
+  if(modo==='cfg'){const c=CFG();cfUrl.value=c.url;cfKey.value=c.key}
+}
+function verCfg(){if(NUBE_URL&&NUBE_KEY)return alert('La conexión está fija en el programa (NUBE_URL / NUBE_KEY).');mostrarLogin('cfg')}
+async function guardarCfg(){
+  const url=cfUrl.value.trim().replace(/\/+$/,''),key=cfKey.value.trim();loginMsg.textContent='';
+  if(!/^https?:\/\/.+/.test(url)||key.length<20)return loginMsg.textContent='Revise la URL y la clave.';
+  localStorage.setItem('mp_nube',JSON.stringify({url,key}));
+  try{await fetch(url+'/auth/v1/health',{headers:{apikey:key}});mostrarLogin('login')}
+  catch(e){loginMsg.textContent='No se pudo conectar con '+url+'. Revise la URL o la conexión a internet.'}
+}
+async function login(){
+  loginMsg.textContent='';btnEntrar.disabled=true;btnEntrar.textContent='Conectando…';
+  try{
+    const j=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:lu.value.trim(),password:lp.value})},false);
+    guardarSes(j);lp.value='';await abrirDatos();entrar();
+  }catch(e){
+    loginMsg.textContent=e.status===400?'Correo o contraseña incorrectos.':!e.status?'No hay conexión con la nube. Revise internet.':'Error: '+e.message;
+    if(e.status&&e.status!==400){SES=null;localStorage.removeItem('mp_ses')}
+  }
+  btnEntrar.disabled=false;btnEntrar.textContent='Entrar';
+}
+function entrar(){U={id:SES.uid,nombre:DB.perfil.nombre||SES.email.split('@')[0],email:SES.email};audit('Inicio de sesión');start()}
+async function logout(){
+  if(SUCIO){clearTimeout(TIMER);toast('Guardando cambios…','#1565c0');await subir()}
+  if(SUCIO&&!confirm('Hay cambios que todavía no se guardaron en la nube (sin conexión).\nSi sale ahora se perderán.\n\n¿Salir de todas formas?'))return;
+  try{await sb('/auth/v1/logout',{method:'POST'})}catch(e){}
+  if(SES)localStorage.removeItem('mp_cache_'+SES.uid);
+  localStorage.removeItem('mp_ses');location.reload();
+}
+function audit(a){DB.log.unshift({id:uid(),f:new Date().toLocaleString(),u:U?U.nombre:'Sistema',a});if(DB.log.length>3000)DB.log.length=3000;return save()}
 function aplicarLogo(){
   const full=(DB&&DB.logo)||LOGO_FULL,emb=(DB&&DB.logo)||LOGO_EMB,emp=(DB&&DB.empresa)||'Ferretería Quilvio';
-  loginLogo.src=full;hdrLogo.src=emb;hdrEmpresa.textContent=emp;loginLogo.alt=hdrLogo.alt=emp;document.title=emp+' – ManteniPro v1.8.0';
+  loginLogo.src=full;hdrLogo.src=emb;hdrEmpresa.textContent=emp;document.title=emp+' – ManteniPro v'+VERSION;
 }
-aplicarLogo();
-
-/* ===================== SESIÓN ===================== */
-let U=null;
-async function login(){
-  await listo;
-  const u=DB.usuarios.find(x=>x.usuario.toLowerCase()===lu.value.trim().toLowerCase());
-  if(!u||!(await passOK(u,lp.value))) return alert('Usuario o contraseña incorrectos');
-  if(u.activo===false) return alert('Este usuario está desactivado. Contacte al administrador.');
-  if(lp.value==='admin123')u.debeCambiar=true;
-  U=u;u.ultimoAcceso=new Date().toLocaleString();sessionStorage.setItem('mp_u',u.id);lp.value='';audit('Inicio de sesión');start();
-  if(u.debeCambiar) setTimeout(()=>cambiarPass(true),50);
-}
-function logout(){sessionStorage.removeItem('mp_u');location.reload()}
-function audit(a){DB.log.unshift({f:new Date().toLocaleString(),u:U?U.nombre:'-',a});DB.log=DB.log.slice(0,2000);save()}
-const puede=r=>({Admin:3,Supervisor:2,'Técnico':1}[U.rol]>=r);
+lp.addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 
 /* ===================== NAVEGACIÓN ===================== */
-const VISTAS=[['dash','📊 Dashboard',1],['equipos','🏭 Equipos',1],['planes','🗓️ Planes PM',1],['ots','📋 Órdenes de Trabajo',1],['hist','📚 Historial',1],['bd','🗄️ Base de Datos',1],['usuarios','👥 Usuarios',3],['whats','📲 WhatsApp',2],['datos','💾 Respaldo',2],['audit','🔒 Auditoría',3]];
-let vista='dash';
+const VISTAS=[['dash','📊 Dashboard'],['equipos','🏭 Equipos'],['planes','🗓️ Planes PM'],['ots','📋 Órdenes de Trabajo'],['hist','📚 Historial'],['bd','🗄️ Base de Datos'],['whats','📲 WhatsApp'],['datos','💾 Respaldo'],['audit','🔒 Auditoría']];
 function start(){
   document.getElementById('login').classList.add('hide');app.classList.remove('hide');
-  who.textContent=U.nombre+' ('+U.rol+')';generarOTs();autoWA(false);go('dash');popupVencidos(false);setInterval(()=>{generarOTs();bellVenc();if(modal.style.display!=='flex')popupVencidos(false)},30*60*1000);
+  who.textContent=U.nombre;aplicarLogo();generarOTs();autoWA(false);go('dash');popupVencidos(false);
+  setInterval(revisarNube,20000);
+  setInterval(()=>{generarOTs();bellVenc();if(modal.style.display!=='flex')popupVencidos(false)},30*60*1000);
+  window.addEventListener('focus',revisarNube);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)revisarNube()});
+  window.addEventListener('online',()=>{if(SUCIO)save();else revisarNube()});
+  window.addEventListener('beforeunload',e=>{if(SUCIO){e.preventDefault();e.returnValue=''}});
 }
-function go(v){vista=v;setTimeout(bellVenc,0);nav.innerHTML=VISTAS.filter(x=>puede(x[2])).map(x=>`<button class="${x[0]===v?'act':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('');R[v]()}
+function go(v){vista=v;nav.innerHTML=VISTAS.map(x=>`<button class="${x[0]===v?'act':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('');R[v]();setTimeout(bellVenc,0)}
 const eqN=id=>(DB.equipos.find(e=>e.id===id)||{}).nombre||'¿?';
 const eqO=id=>DB.equipos.find(e=>e.id===id)||{};
 const prox=p=>addDias(p.ultima,p.frecuencia);
 function estadoTag(d){return d<0?`<span class="tag t-r">Vencido ${-d}d</span>`:d<=7?`<span class="tag t-a">En ${d}d</span>`:`<span class="tag t-v">En ${d}d</span>`}
-const STATUS=['Bajo','Medio','Alto'];
-const stTag=s=>`<span class="tag st-${s||'Bajo'}">${s==='Alto'?'▲ ':s==='Medio'?'■ ':'▼ '}${s||'Bajo'}</span>`;
 const prTag=p=>p>=7?'<span class="tag t-r">7 CRÍTICO</span>':'<span class="tag t-g">2 Normal</span>';
+const stTag=s=>`<span class="tag st-${s||'Bajo'}">${s==='Alto'?'▲ ':s==='Medio'?'■ ':'▼ '}${s||'Bajo'}</span>`;
+const FREQ=[[1,'Diario'],[7,'Semanal'],[14,'Cada 2 semanas'],[30,'Mensual'],[90,'Trimestral'],[180,'Semestral'],[365,'Anual']];
+const frecTxt=d=>(FREQ.find(f=>f[0]==d)||[0,d+' días'])[1];
 
 /* Genera OT automáticamente cuando un PM está a 7 días o menos */
 function generarOTs(){
   let n=0;
   DB.planes.filter(p=>p.activo).forEach(p=>{
-    if(diff(prox(p))<=7 && !DB.ots.some(o=>o.planId===p.id&&o.estado!=='Completada')){
+    if(diff(prox(p))<=7&&!DB.ots.some(o=>o.planId===p.id&&o.estado!=='Completada')){
       DB.ots.push({id:uid(),num:'F'+(++DB.seq),planId:p.id,equipoId:p.equipoId,tipo:'PM',descripcion:p.descripcion,crew:p.crew,
         inicio:addDias(prox(p),-7),fin:prox(p),estado:'Abierta',asignado:'',creada:new Date().toLocaleString()});n++}
   });
-  if(n){audit(`Generadas ${n} OT de PM automáticamente`);}
+  if(n)audit(`Generadas ${n} OT de PM automáticamente`);
 }
 
 /* ===================== VISTAS ===================== */
 const R={};
 R.dash=()=>{
   const ab=DB.ots.filter(o=>o.estado!=='Completada');
-  const venc=ab.filter(o=>diff(o.fin)<0), sem=ab.filter(o=>diff(o.fin)>=0&&diff(o.fin)<=7);
+  const venc=ab.filter(o=>diff(o.fin)<0),sem=ab.filter(o=>diff(o.fin)>=0&&diff(o.fin)<=7);
   const crit=ab.filter(o=>eqO(o.equipoId).prioridad>=7);
   const mes=DB.ots.filter(o=>o.estado==='Completada'&&o.cierre&&o.cierre.slice(0,7)===hoy().slice(0,7));
   const fs=DB.equipos.filter(e=>e.estado!=='Operativo');
@@ -206,57 +437,67 @@ R.dash=()=>{
    <div class="kpi">Equipos<b>${DB.equipos.length}</b></div><div class="kpi a">Equipos fuera de servicio<b>${fs.length}</b></div>
    <div class="kpi r" style="cursor:pointer" onclick="go('equipos');fst.value='Alto';R.equipos2()">Status ALTO<b>${DB.equipos.filter(e=>e.status==='Alto').length}</b></div>
    <div class="kpi a" style="cursor:pointer" onclick="go('equipos');fst.value='Medio';R.equipos2()">Status MEDIO<b>${DB.equipos.filter(e=>e.status==='Medio').length}</b></div>
-   <div class="kpi v" style="cursor:pointer" onclick="go('equipos');fst.value='Bajo';R.equipos2()">Status BAJO<b>${DB.equipos.filter(e=>(e.status||'Bajo')==='Bajo').length}</b></div></div>
-   <div class="card"><div class="row"><h2 style="flex:1">⏰ Recordatorios – PM pendientes (ordenados por fecha límite)</h2><button class="btn v" onclick="waResumen()">📲 Enviar resumen por WhatsApp</button><button class="btn" onclick="compartir(msgResumen(),'Alerta de Mantenimiento')">📤 Compartir</button></div>${tablaOT(ab.sort((a,b)=>a.fin.localeCompare(b.fin)))}</div>`;
+   <div class="kpi v" style="cursor:pointer" onclick="go('equipos');fst.value='Bajo';R.equipos2()">Status BAJO<b>${DB.equipos.filter(e=>e.status==='Bajo').length}</b></div></div>
+   <div class="card"><div class="row"><h2 style="flex:1">⏰ Recordatorios – PM pendientes (ordenados por fecha límite)</h2>
+   <button class="btn v" onclick="waResumen()">📲 Enviar resumen por WhatsApp</button><button class="btn" onclick="compartir(msgResumen(),'Alerta de Mantenimiento')">📤 Compartir</button></div>
+   ${tablaOT(ab.sort((a,b)=>a.fin.localeCompare(b.fin)))}</div>`;
 };
 function tablaOT(l){
-  if(!l.length) return '<p>Sin órdenes.</p>';
-  return `<div class="tw"><table><tr><th>OT</th><th>Equipo</th><th>Descripción</th><th>Tipo</th><th>Crew</th><th>Prioridad</th><th>Status</th><th>Inicio</th><th>Límite</th><th>Estado</th><th>Asignado</th><th></th></tr>
+  if(!l.length)return '<p>Sin órdenes.</p>';
+  return `<div class="tw"><table><tr><th>OT</th><th>Equipo</th><th>Descripción</th><th>Tipo</th><th>Crew</th><th>Prioridad</th><th>Status</th><th>Inicio</th><th>Límite</th><th>Estado</th><th></th></tr>
   ${l.map(o=>`<tr><td>${o.num}</td><td>${esc(eqN(o.equipoId))}</td><td>${esc(o.descripcion)}</td><td>${o.tipo}</td><td>${o.crew}</td><td>${prTag(eqO(o.equipoId).prioridad)}</td><td>${stTag(eqO(o.equipoId).status)}</td>
   <td>${o.inicio}</td><td>${o.fin}</td><td>${o.estado==='Completada'?'<span class="tag t-v">Completada</span>':estadoTag(diff(o.fin))+' <span class="tag t-b">'+o.estado+'</span>'}</td>
-  <td>${esc(o.asignado)}</td><td>${o.estado!=='Completada'?`<button class="btn sm v" onclick="cerrarOT('${o.id}')">Completar</button> <button class="btn sm s" title="WhatsApp" onclick="waOT('${o.id}')">📲</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button>${puede(2)?` <button class="btn sm r" title="Borrar" onclick="borrarOT('${o.id}')">🗑</button>`:''}`:`<button class="btn sm s" onclick="verOT('${o.id}')">Ver</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button>${puede(3)?` <button class="btn sm r" title="Borrar" onclick="borrarOT('${o.id}')">🗑</button>`:''}`}</td></tr>`).join('')}</table></div>`;
+  <td style="white-space:nowrap">${o.estado!=='Completada'
+    ?`<button class="btn sm v" onclick="cerrarOT('${o.id}')">Completar</button> <button class="btn sm s" title="WhatsApp" onclick="waOT('${o.id}')">📲</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button> <button class="btn sm r" title="Borrar" onclick="borrarOT('${o.id}')">🗑</button>`
+    :`<button class="btn sm s" onclick="verOT('${o.id}')">Ver</button>`}</td></tr>`).join('')}</table></div>`;
 }
 
+/* ---------- EQUIPOS ---------- */
 R.equipos=()=>{
-  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Equipos</h2><select id="fst" style="max-width:150px" onchange="R.equipos2()"><option value="">Todos los status</option>${STATUS.map(s=>`<option>${s}</option>`).join('')}</select><input id="fq" placeholder="Buscar..." style="max-width:220px" oninput="R.equipos2()">
-  ${puede(2)?'<button class="btn" onclick="editEq()">+ Nuevo equipo</button>':''}</div><div id="tq"></div></div>`;R.equipos2();
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">🏭 Equipos</h2>
+  <select id="fst" style="max-width:150px" onchange="R.equipos2()"><option value="">Todos los status</option>${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
+  <input id="fq" placeholder="Buscar..." style="max-width:220px" oninput="R.equipos2()"><button class="btn" onclick="editEq()">+ Nuevo equipo</button></div><div id="tq"></div></div>`;R.equipos2();
 };
 R.equipos2=()=>{
-  const q=(fq.value||'').toLowerCase();
-  const fs=fst.value;const l=DB.equipos.filter(e=>JSON.stringify(e).toLowerCase().includes(q)&&(!fs||e.status===fs)).sort((a,b)=>STATUS.indexOf(b.status)-STATUS.indexOf(a.status));
+  const q=fq.value.toLowerCase(),fs=fst.value;
+  const l=DB.equipos.filter(e=>JSON.stringify(e).toLowerCase().includes(q)&&(!fs||e.status===fs)).sort((a,b)=>STATUS.indexOf(b.status)-STATUS.indexOf(a.status));
   tq.innerHTML=`<div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Ubicación</th><th>Prioridad</th><th>Status</th><th>Estado</th><th>Próximo PM</th><th></th></tr>
   ${l.map(e=>{const ps=DB.planes.filter(p=>p.equipoId===e.id&&p.activo).map(prox).sort();return `<tr><td>${esc(e.codigo)}</td><td>${esc(e.nombre)}</td><td>${esc(e.tipo)}</td><td>${esc(e.ubicacion)}</td>
-  <td>${prTag(e.prioridad)}</td><td>${puede(1)?`<select class="stsel" style="width:auto;padding:3px" onchange="setStatus('${e.id}',this.value)">${STATUS.map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select>`:''} ${stTag(e.status)}</td><td>${esc(e.estado)}</td><td>${ps[0]?ps[0]+' '+estadoTag(diff(ps[0])):'-'}</td>
-  <td><button class="btn sm s" onclick="histEq('${e.id}')">Historial</button> <button class="btn sm s" onclick="nuevaCorr('${e.id}')">Falla/OT</button>${puede(2)?` <button class="btn sm s" onclick="editPlan(null,false,'${e.id}')">+ Plan PM</button>`:''}
-  ${puede(2)?`<button class="btn sm" onclick="editEq('${e.id}')">Editar</button>`:''}</td></tr>`}).join('')}</table></div>`;
+  <td>${prTag(e.prioridad)}</td><td><select class="stsel" style="width:auto;padding:3px" onchange="setStatus('${e.id}',this.value)">${STATUS.map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select> ${stTag(e.status)}</td>
+  <td>${esc(e.estado)}</td><td>${ps[0]?ps[0]+' '+estadoTag(diff(ps[0])):'-'}</td>
+  <td style="white-space:nowrap"><button class="btn sm s" onclick="histEq('${e.id}')">Historial</button> <button class="btn sm s" onclick="nuevaCorr('${e.id}')">Falla/OT</button> <button class="btn sm s" onclick="editPlan(null,false,'${e.id}')">+ Plan PM</button> <button class="btn sm" onclick="editEq('${e.id}')">Editar</button></td></tr>`}).join('')||'<tr><td colspan="9">Sin equipos.</td></tr>'}</table></div>`;
 };
 function editEq(id){
   const e=DB.equipos.find(x=>x.id===id)||{codigo:'',nombre:'',tipo:'',ubicacion:'',prioridad:2,marca:'',serie:'',estado:'Operativo',status:''};
   modal_(`<h2>${id?'Editar':'Nuevo'} equipo</h2><div class="grid">
-  ${['codigo','nombre','tipo','ubicacion','marca','serie'].map(k=>`<label>${k[0].toUpperCase()+k.slice(1)}<input id="e_${k}" value="${esc(e[k])}"></label>`).join('')}
+  ${[['codigo','Código'],['nombre','Nombre'],['tipo','Tipo'],['ubicacion','Ubicación'],['marca','Marca'],['serie','Serie']].map(([k,t])=>`<label>${t}<input id="e_${k}" value="${esc(e[k])}"></label>`).join('')}
   <label>Prioridad<select id="e_prioridad"><option value="2">2 – Normal</option><option value="7" ${e.prioridad>=7?'selected':''}>7 – Crítico</option></select></label>
-  <label>Status (condición) <b style="color:var(--rojo)">*</b><select id="e_status" required><option value="" ${e.status?'':'selected'} disabled>-- Seleccione status --</option>${STATUS.map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select></label>
+  <label>Status (condición) <b style="color:var(--rojo)">*</b><select id="e_status"><option value="" ${e.status?'':'selected'} disabled>-- Seleccione status --</option>${STATUS.map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select></label>
   <label>Estado<select id="e_estado">${['Operativo','En mantenimiento','Fuera de servicio'].map(s=>`<option ${s===e.estado?'selected':''}>${s}</option>`).join('')}</select></label></div>
   <div class="row"><button class="btn" onclick="guardaEq('${id||''}')">Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button>
-  ${id&&puede(3)?`<button class="btn r" onclick="borraEq('${id}')">Eliminar</button>`:''}</div>`);
+  ${id?`<button class="btn r" onclick="borraEq('${id}')">Eliminar</button>`:''}</div>`);
 }
 function guardaEq(id){
-  const o={};['codigo','nombre','tipo','ubicacion','marca','serie','estado'].forEach(k=>o[k]=document.getElementById('e_'+k).value.trim());o.prioridad=+e_prioridad.value;o.status=e_status.value;
-  if(!o.codigo||!o.nombre) return alert('Código y nombre son obligatorios');
+  const o={};['codigo','nombre','tipo','ubicacion','marca','serie','estado','status'].forEach(k=>o[k]=document.getElementById('e_'+k).value.trim());o.prioridad=+e_prioridad.value;
+  if(!o.codigo||!o.nombre)return alert('Código y nombre son obligatorios');
   if(!o.status){e_status.style.border='2px solid var(--rojo)';e_status.focus();return alert('Debe seleccionar el Status del equipo: Bajo, Medio o Alto.')}
-  if(id){const ant=DB.equipos.find(x=>x.id===id);if(ant.status!==o.status)audit(`Cambió status de ${o.codigo}: ${ant.status||'Bajo'} → ${o.status}`);Object.assign(ant,o);audit('Editó equipo '+o.codigo)}else{DB.equipos.push({id:uid(),...o});audit('Creó equipo '+o.codigo)}
-  save();cerrar();R.equipos();
+  if(DB.equipos.some(x=>x.codigo.toLowerCase()===o.codigo.toLowerCase()&&x.id!==id))return alert('Ya existe un equipo con el código '+o.codigo);
+  if(id){const ant=DB.equipos.find(x=>x.id===id);if(ant.status!==o.status)DB.log.unshift({id:uid(),f:new Date().toLocaleString(),u:U.nombre,a:`Cambió status de ${o.codigo}: ${ant.status} → ${o.status}`});Object.assign(ant,o);audit('Editó equipo '+o.codigo)}
+  else{DB.equipos.push({id:uid(),...o});audit('Creó equipo '+o.codigo)}
+  cerrar();R.equipos();
 }
-function setStatus(id,v){const e=DB.equipos.find(x=>x.id===id);audit(`Cambió status de ${e.codigo}: ${e.status||'Bajo'} → ${v}`);e.status=v;save();R.equipos2()}
-function borraEq(id){if(!confirm('¿Eliminar equipo y sus planes?'))return;const e=DB.equipos.find(x=>x.id===id);
-  DB.equipos=DB.equipos.filter(x=>x.id!==id);DB.planes=DB.planes.filter(p=>p.equipoId!==id);audit('Eliminó equipo '+e.codigo);save();cerrar();R.equipos()}
+function setStatus(id,v){const e=DB.equipos.find(x=>x.id===id);const a=e.status;e.status=v;audit(`Cambió status de ${e.codigo}: ${a} → ${v}`);R.equipos2()}
+function borraEq(id){const e=DB.equipos.find(x=>x.id===id);
+  if(!confirm(`¿Eliminar el equipo ${e.codigo} y sus planes PM?\nSus órdenes abiertas también se borrarán; el historial se conserva.`))return;
+  DB.equipos=DB.equipos.filter(x=>x.id!==id);DB.planes=DB.planes.filter(p=>p.equipoId!==id);DB.ots=DB.ots.filter(o=>!(o.equipoId===id&&o.estado!=='Completada'));
+  audit('Eliminó equipo '+e.codigo);cerrar();R.equipos()}
 
+/* ---------- PLANES PM ---------- */
 R.planes=()=>{
   main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">🗓️ Planes de Mantenimiento Preventivo</h2>
   <select id="pf_eq" style="max-width:240px" onchange="R.planes2()"><option value="">Todos los equipos</option>${DB.equipos.map(e=>`<option value="${e.id}">${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select>
   <select id="pf_st" style="max-width:150px" onchange="R.planes2()"><option value="">Todos</option><option value="v">Vencidos</option><option value="p">Próximos ≤7 días</option><option value="i">Inactivos</option></select>
-  <input id="pf_q" placeholder="Buscar..." style="max-width:180px" oninput="R.planes2()">
-  ${puede(2)?'<button class="btn" onclick="editPlan()">+ Nuevo plan PM</button>':''}</div><div id="tpl"></div></div>`;R.planes2();
+  <input id="pf_q" placeholder="Buscar..." style="max-width:180px" oninput="R.planes2()"><button class="btn" onclick="editPlan()">+ Nuevo plan PM</button></div><div id="tpl"></div></div>`;R.planes2();
 };
 R.planes2=()=>{
   const e=pf_eq.value,st=pf_st.value,q=pf_q.value.toLowerCase();
@@ -265,10 +506,8 @@ R.planes2=()=>{
   tpl.innerHTML=`<p style="font-size:12px;color:#666">${l.length} de ${DB.planes.length} planes</p><div class="tw"><table><tr><th>Equipo</th><th>Descripción</th><th>Frecuencia</th><th>Crew</th><th>Checklist</th><th>Último</th><th>Próximo</th><th>Estado</th><th></th></tr>
   ${l.map(p=>`<tr><td>${esc(eqN(p.equipoId))}</td><td>${esc(p.descripcion)}</td><td>${frecTxt(p.frecuencia)}</td><td>${p.crew}</td><td>${(p.tareas||'').split('\n').filter(Boolean).length} tareas</td>
   <td>${p.ultima}</td><td>${prox(p)}</td><td>${p.activo?estadoTag(diff(prox(p))):'<span class="tag t-g">Inactivo</span>'}</td>
-  <td style="white-space:nowrap">${puede(2)?`<button class="btn sm" onclick="editPlan('${p.id}')">✏️ Editar</button> <button class="btn sm s" title="Duplicar" onclick="editPlan('${p.id}',true)">⧉</button> <button class="btn sm r" title="Eliminar" onclick="borraPlan('${p.id}')">🗑</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9">Sin planes.</td></tr>'}</table></div>`;
+  <td style="white-space:nowrap"><button class="btn sm" onclick="editPlan('${p.id}')">✏️ Editar</button> <button class="btn sm s" title="Duplicar" onclick="editPlan('${p.id}',true)">⧉</button> <button class="btn sm r" title="Eliminar" onclick="borraPlan('${p.id}')">🗑</button></td></tr>`).join('')||'<tr><td colspan="9">Sin planes.</td></tr>'}</table></div>`;
 };
-const FREQ=[[1,'Diario'],[7,'Semanal'],[14,'Cada 2 semanas'],[30,'Mensual'],[90,'Trimestral'],[180,'Semestral'],[365,'Anual']];
-const frecTxt=d=>(FREQ.find(f=>f[0]==d)||[0,d+' días'])[1];
 function editPlan(id,dup,eqId){
   const src=DB.planes.find(x=>x.id===id);
   const p=src?{...src}:{equipoId:eqId||'',descripcion:'',frecuencia:30,crew:'EMT',tareas:'',ultima:hoy(),activo:true};
@@ -285,36 +524,35 @@ function editPlan(id,dup,eqId){
   <label>Tareas / checklist (una por línea)<textarea id="p_tar" rows="7">${esc(p.tareas)}</textarea></label>
   <p style="font-size:12px;color:#666" id="p_prox"></p>
   <div class="row"><button class="btn v" onclick="guardaPlan('${id||''}')">💾 Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button>
-  ${id&&puede(2)?`<button class="btn r" onclick="borraPlan('${id}')">🗑 Eliminar</button>`:''}</div>`);
+  ${id?`<button class="btn r" onclick="borraPlan('${id}')">🗑 Eliminar</button>`:''}</div>`);
   const upd=()=>{const f=p_fr.value==='0'?+p_dias.value:+p_fr.value;p_prox.textContent=f>0&&p_ult.value?'Próximo PM: '+addDias(p_ult.value,f):''};
-  [p_fr,p_dias,p_ult].forEach(x=>x.addEventListener('input',upd));upd();
+  [p_fr,p_dias,p_ult].forEach(x=>{x.addEventListener('input',upd);x.addEventListener('change',upd)});upd();
 }
 function guardaPlan(id){
   const f=p_fr.value==='0'?Math.round(+p_dias.value):+p_fr.value;
   const o={equipoId:p_eq.value,descripcion:p_desc.value.trim(),frecuencia:f,crew:p_crew.value,ultima:p_ult.value,activo:p_act.value==='1',tareas:p_tar.value.split('\n').map(t=>t.trim()).filter(Boolean).join('\n')};
-  if(!o.equipoId) return alert('Seleccione el equipo');
-  if(!o.descripcion) return alert('Falta descripción');
-  if(!(f>=1)) return alert('La frecuencia debe ser de al menos 1 día');
-  if(!o.ultima) return alert('Indique la fecha de última realización');
+  if(!o.equipoId)return alert('Seleccione el equipo');
+  if(!o.descripcion)return alert('Falta descripción');
+  if(!(f>=1))return alert('La frecuencia debe ser de al menos 1 día');
+  if(!o.ultima)return alert('Indique la fecha de última realización');
   if(id){
     const p=DB.planes.find(x=>x.id===id);Object.assign(p,o);
-    DB.ots.filter(t=>t.planId===id&&t.estado!=='Completada').forEach(t=>{
-      if(!o.activo){DB.ots=DB.ots.filter(x=>x.id!==t.id);return}
-      Object.assign(t,{equipoId:o.equipoId,descripcion:o.descripcion,crew:o.crew,fin:prox(p),inicio:addDias(prox(p),-7)})});
-    DB.ots=DB.ots.filter(t=>!(t.planId===id&&t.estado!=='Completada'&&diff(t.fin)>7));
+    DB.ots=DB.ots.filter(t=>!(t.planId===id&&t.estado!=='Completada'&&(!o.activo||diff(prox(p))>7)));
+    DB.ots.filter(t=>t.planId===id&&t.estado!=='Completada').forEach(t=>Object.assign(t,{equipoId:o.equipoId,descripcion:o.descripcion,crew:o.crew,fin:prox(p),inicio:addDias(prox(p),-7)}));
     audit('Editó plan PM '+o.descripcion);
   }else{DB.planes.push({id:uid(),...o});audit('Creó plan PM '+o.descripcion+' ('+eqN(o.equipoId)+')')}
-  generarOTs();save();cerrar();go('planes');
+  generarOTs();cerrar();go('planes');
 }
 function borraPlan(id){
   const p=DB.planes.find(x=>x.id===id),ab=DB.ots.filter(t=>t.planId===id&&t.estado!=='Completada');
   if(!confirm(`¿Eliminar el plan "${p.descripcion}" de ${eqN(p.equipoId)}?`+(ab.length?`\n\nTambién se borrará(n) ${ab.length} orden(es) abierta(s) de este plan.`:'')+'\nEl historial de trabajos completados se conserva.'))return;
   DB.planes=DB.planes.filter(x=>x.id!==id);DB.ots=DB.ots.filter(t=>!(t.planId===id&&t.estado!=='Completada'));
-  audit(`Eliminó plan PM ${p.descripcion} (${eqN(p.equipoId)})`);save();cerrar();go('planes');
+  audit(`Eliminó plan PM ${p.descripcion} (${eqN(p.equipoId)})`);cerrar();go('planes');
 }
 
+/* ---------- ÓRDENES DE TRABAJO ---------- */
 R.ots=()=>{
-  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Órdenes de Trabajo abiertas</h2>
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">📋 Órdenes de Trabajo abiertas</h2>
   <select id="fcrew" style="max-width:160px" onchange="R.ots2()"><option value="">Todas las crews</option><option>EMT</option><option>CONTROL</option><option>CONTRATISTA</option></select>
   <button class="btn" onclick="nuevaCorr()">+ OT Correctiva / Falla</button></div><div id="tot"></div></div>`;R.ots2();
 };
@@ -328,225 +566,40 @@ function nuevaCorr(eid){
   <div class="row"><button class="btn" onclick="guardaCorr()">Crear OT</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
 }
 function guardaCorr(){
-  if(!c_desc.value.trim()) return alert('Describa la falla');
-  const o={id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:c_eq.value,tipo:'CM',descripcion:c_desc.value.trim(),crew:c_crew.value,inicio:hoy(),fin:c_fin.value,estado:'Abierta',asignado:'',creada:new Date().toLocaleString(),reporto:U.nombre};
-  DB.ots.push(o);audit('Creó OT correctiva '+o.num);save();cerrar();go('ots');
+  if(!c_desc.value.trim())return alert('Describa la falla');
+  const o={id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:c_eq.value,tipo:'CM',descripcion:c_desc.value.trim(),crew:c_crew.value,inicio:hoy(),fin:c_fin.value||hoy(),estado:'Abierta',asignado:'',creada:new Date().toLocaleString(),reporto:U.nombre};
+  DB.ots.push(o);audit('Creó OT correctiva '+o.num);cerrar();go('ots');
 }
 function cerrarOT(id){
-  const o=DB.ots.find(x=>x.id===id);const p=DB.planes.find(x=>x.id===o.planId);
+  const o=DB.ots.find(x=>x.id===id),p=DB.planes.find(x=>x.id===o.planId);
   const tareas=(p?p.tareas:'').split('\n').filter(Boolean);
   modal_(`<h2>Completar ${o.num} – ${esc(eqN(o.equipoId))}</h2><p>${esc(o.descripcion)}</p>
-  ${tareas.length?'<b>Checklist</b>'+tareas.map((t,i)=>`<label><input type="checkbox" class="chk" style="width:auto" data-t="${esc(t)}"> ${esc(t)}</label>`).join(''):''}
+  ${tareas.length?'<b>Checklist</b>'+tareas.map(t=>`<label><input type="checkbox" class="chk" style="width:auto" data-t="${esc(t)}"> ${esc(t)}</label>`).join(''):''}
   <div class="grid"><label>Realizado por<input id="x_tec" value="${esc(U.nombre)}"></label>
-  <label>Fecha realizada<input type="date" id="x_f" value="${hoy()}"></label><label>Horas de labor<input type="number" step="0.25" id="x_h" value="1"></label>
+  <label>Fecha realizada<input type="date" id="x_f" value="${hoy()}" max="${hoy()}"></label><label>Horas de labor<input type="number" step="0.25" min="0" id="x_h" value="1"></label>
   <label>Resultado<select id="x_res"><option>OK – Sin hallazgos</option><option>OK – Con ajustes</option><option>Requiere seguimiento</option></select></label></div>
-  <div class="grid"><label>Repuestos usados<input id="x_rep"></label><label>Costo repuestos ($)<input type="number" step="0.01" min="0" id="x_cost" value="0"></label></div><label>Notas / hallazgos<textarea id="x_n" rows="3"></textarea></label>
+  <div class="grid"><label>Repuestos usados<input id="x_rep"></label><label>Costo repuestos ($)<input type="number" step="0.01" min="0" id="x_cost" value="0"></label></div>
+  <label>Notas / hallazgos<textarea id="x_n" rows="3"></textarea></label>
   <div class="row"><button class="btn v" onclick="guardaCierre('${id}')">✔ Completar OT</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
 }
 function guardaCierre(id){
-  const o=DB.ots.find(x=>x.id===id);
+  if(!x_tec.value.trim())return alert('Indique quién realizó el trabajo');
+  const o=DB.ots.find(x=>x.id===id);if(!o){cerrar();return alert('Esta orden ya no existe (fue modificada en otro dispositivo).')}
   const chk=[...document.querySelectorAll('.chk')].map(c=>(c.checked?'✔ ':'✘ ')+c.dataset.t);
-  Object.assign(o,{estado:'Completada',tecnico:x_tec.value,cierre:x_f.value,horas:+x_h.value,resultado:x_res.value,repuestos:x_rep.value,costo:+x_cost.value||0,notas:x_n.value,checklist:chk,cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString()});
-  const p=DB.planes.find(x=>x.id===o.planId);if(p) p.ultima=x_f.value;
-  if(o.resultado==='Requiere seguimiento') DB.ots.push({id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:o.equipoId,tipo:'CM',descripcion:'Seguimiento de '+o.num+': '+o.notas,crew:o.crew,inicio:hoy(),fin:addDias(hoy(),3),estado:'Abierta',asignado:'',creada:new Date().toLocaleString()});
-  audit(`Completó ${o.num} (${eqN(o.equipoId)}) – técnico: ${o.tecnico}`);generarOTs();save();cerrar();go(vista);
+  Object.assign(o,{estado:'Completada',tecnico:x_tec.value.trim(),cierre:x_f.value||hoy(),horas:+x_h.value||0,resultado:x_res.value,repuestos:x_rep.value,costo:+x_cost.value||0,notas:x_n.value,checklist:chk,cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString()});
+  const p=DB.planes.find(x=>x.id===o.planId);if(p)p.ultima=o.cierre;
+  if(o.resultado==='Requiere seguimiento')DB.ots.push({id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:o.equipoId,tipo:'CM',descripcion:'Seguimiento de '+o.num+': '+o.notas,crew:o.crew,inicio:hoy(),fin:addDias(hoy(),3),estado:'Abierta',asignado:'',creada:new Date().toLocaleString()});
+  audit(`Completó ${o.num} (${eqN(o.equipoId)}) – técnico: ${o.tecnico}`);generarOTs();cerrar();go(vista);
 }
 function verOT(id){const o=DB.ots.find(x=>x.id===id);
   modal_(`<h2>${o.num} – ${esc(eqN(o.equipoId))}</h2><p><b>${esc(o.descripcion)}</b> (${o.tipo}, ${o.crew})</p>
   <p>Realizado por: <b>${esc(o.tecnico)}</b> el ${o.cierre} · ${o.horas} h · ${esc(o.resultado)}</p>
-  <p>Repuestos: ${esc(o.repuestos||'-')}</p><p>Notas: ${esc(o.notas||'-')}</p>${(o.checklist||[]).map(c=>'<div>'+esc(c)+'</div>').join('')}
-  <p style="font-size:12px;color:#777">Cerrado en sistema por ${esc(o.cerradoPor)} – ${o.cerradoEn}</p><div class="row"><button class="btn" onclick="compartirOT('${o.id}')">📤 Compartir reporte</button>${puede(3)?`<button class="btn r" onclick="borrarOT('${o.id}')">🗑 Borrar registro</button>`:''}<button class="btn s" onclick="cerrar()">Cerrar</button></div>`)}
-
-R.hist=(eid)=>{
-  const l=DB.ots.filter(o=>o.estado==='Completada'&&(!eid||o.equipoId===eid)).sort((a,b)=>b.cierre.localeCompare(a.cierre));
-  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Historial de mantenimiento ${eid?'– '+esc(eqN(eid)):''}</h2>
-  <button class="btn s" onclick="csvHist()">⬇ Exportar CSV</button></div>
-  <div class="tw"><table><tr><th>OT</th><th>Fecha</th><th>Equipo</th><th>Descripción</th><th>Tipo</th><th>Realizado por</th><th>Horas</th><th>Resultado</th><th></th></tr>
-  ${l.map(o=>`<tr><td>${o.num}</td><td>${o.cierre}</td><td>${esc(eqN(o.equipoId))}</td><td>${esc(o.descripcion)}</td><td>${o.tipo}</td><td>${esc(o.tecnico)}</td><td>${o.horas}</td><td>${esc(o.resultado)}</td>
-  <td><button class="btn sm s" onclick="verOT('${o.id}')">Ver</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button>${puede(3)?` <button class="btn sm r" title="Borrar" onclick="borrarOT('${o.id}')">🗑</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9">Sin registros.</td></tr>'}</table></div></div>`;
-};
-function histEq(id){vista='hist';go('hist');R.hist(id)}
-function csvHist(){
-  const rows=[['OT','Fecha','Equipo','Descripcion','Tipo','Crew','Tecnico','Horas','Resultado','Repuestos','Notas']].concat(
-   DB.ots.filter(o=>o.estado==='Completada').map(o=>[o.num,o.cierre,eqN(o.equipoId),o.descripcion,o.tipo,o.crew,o.tecnico,o.horas,o.resultado,o.repuestos,o.notas]));
-  bajar('historial_mantenimiento_'+hoy()+'.csv',rows.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv');
-}
-
-/* ===================== USUARIOS Y CONTRASEÑAS ===================== */
-const ROLES=['Técnico','Supervisor','Admin'];
-const sal=()=>[...crypto.getRandomValues(new Uint8Array(16))].map(x=>x.toString(16).padStart(2,'0')).join('');
-async function setPass(u,pw){u.salt=sal();u.pass=await hash(u.salt+pw);u.passFecha=hoy()}
-async function passOK(u,pw){return u.pass===(u.salt?await hash(u.salt+pw):await hash(pw))}
-function reglaPass(p1,p2){
-  if(p1.length<6) return 'La contraseña debe tener al menos 6 caracteres.';
-  if(!/[A-Za-z]/.test(p1)||!/\d/.test(p1)) return 'La contraseña debe tener letras y números.';
-  if(p1!==p2) return 'Las contraseñas no coinciden.';
-  return '';
-}
-const ojo=id=>`<button type="button" class="btn sm s" style="margin-top:4px" onclick="${id}.type=${id}.type==='password'?'text':'password'">👁 Mostrar</button>`;
-const adminsActivos=ex=>DB.usuarios.filter(u=>u.rol==='Admin'&&u.activo!==false&&u.id!==ex).length;
-async function guardadoOK(msg){const ok=await save();if(ok)toast('✔ '+msg+' – guardado en la base de datos')}
-function toast(t){let d=document.getElementById('toast');if(!d){d=document.createElement('div');d.id='toast';d.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:10px 18px;border-radius:8px;z-index:99;font-size:14px;box-shadow:0 4px 12px #0004';document.body.appendChild(d)}
-  d.textContent=t;d.style.display='block';clearTimeout(d._t);d._t=setTimeout(()=>d.style.display='none',3000)}
-
-R.usuarios=()=>{
-  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">👥 Usuarios (${DB.usuarios.length})</h2><input id="uf_q" placeholder="Buscar..." style="max-width:200px" oninput="R.usuarios2()"><button class="btn" onclick="editU()">+ Nuevo usuario</button></div>
-  <div id="tus"></div>
-  <p style="font-size:12px">Roles: <b>Técnico</b> completa OT y crea fallas · <b>Supervisor</b> + equipos, planes, borrar OT abiertas y respaldo · <b>Admin</b> + usuarios, borrar registros y auditoría.<br>
-  Las contraseñas se guardan cifradas (SHA-256 con sal) en la base de datos interna. Nadie puede verlas; solo restablecerlas.</p></div>`;R.usuarios2();
-};
-R.usuarios2=()=>{
-  const q=uf_q.value.toLowerCase();
-  const l=DB.usuarios.filter(u=>(u.usuario+' '+u.nombre+' '+u.rol).toLowerCase().includes(q)).sort((a,b)=>ROLES.indexOf(b.rol)-ROLES.indexOf(a.rol)||a.nombre.localeCompare(b.nombre));
-  tus.innerHTML=`<div class="tw"><table><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>WhatsApp</th><th>Estado</th><th>Último acceso</th><th>Contraseña</th><th></th></tr>
-  ${l.map(u=>`<tr><td><b>${esc(u.usuario)}</b>${u.id===U.id?' <span class="tag t-b">Usted</span>':''}</td><td>${esc(u.nombre)}</td><td>${u.rol}</td><td>${esc(u.tel||'-')}</td>
-  <td>${u.activo===false?'<span class="tag t-g">Inactivo</span>':'<span class="tag t-v">Activo</span>'}</td><td>${esc(u.ultimoAcceso||'-')}</td>
-  <td>${u.debeCambiar?'<span class="tag t-a">Debe cambiarla</span>':'<span style="font-size:12px">'+(u.passFecha?'Cambiada '+u.passFecha:'OK')+'</span>'}</td>
-  <td style="white-space:nowrap"><button class="btn sm" onclick="editU('${u.id}')">✏️ Editar</button> <button class="btn sm s" title="Restablecer contraseña" onclick="resetPass('${u.id}')">🔑</button>
-  ${u.id!==U.id?`<button class="btn sm r" title="Eliminar" onclick="borraU('${u.id}')">🗑</button>`:''}</td></tr>`).join('')||'<tr><td colspan="8">Sin usuarios.</td></tr>'}</table></div>`;
-};
-function editU(id){
-  const u=DB.usuarios.find(x=>x.id===id)||{usuario:'',nombre:'',rol:'Técnico',tel:'',activo:true,debeCambiar:true};
-  modal_(`<h2>${id?'Editar':'Nuevo'} usuario</h2><div class="grid">
-  <label>Usuario (para entrar) <b style="color:var(--rojo)">*</b><input id="u_u" value="${esc(u.usuario)}" autocomplete="off"></label>
-  <label>Nombre completo <b style="color:var(--rojo)">*</b><input id="u_n" value="${esc(u.nombre)}"></label>
-  <label>Rol<select id="u_r">${ROLES.map(r=>`<option ${r===u.rol?'selected':''}>${r}</option>`).join('')}</select></label>
-  <label>Estado<select id="u_a"><option value="1">Activo</option><option value="0" ${u.activo===false?'selected':''}>Inactivo</option></select></label>
-  <label>WhatsApp (ej. 16095551234)<input id="u_tel" value="${esc(u.tel||'')}"></label></div>
-  <div class="card" style="background:#f8fafc"><b>Contraseña</b> ${id?'<span style="font-size:12px">(déjela vacía para no cambiarla)</span>':'<b style="color:var(--rojo)">*</b>'}
-  <div class="grid"><label>Contraseña<input type="password" id="u_p" autocomplete="new-password">${ojo('u_p')}</label>
-  <label>Confirmar contraseña<input type="password" id="u_p2" autocomplete="new-password"></label></div>
-  <p style="font-size:12px;color:#666;margin:0">Mínimo 6 caracteres, con letras y números.</p>
-  <label style="margin-top:8px"><input type="checkbox" id="u_dc" style="width:auto" ${u.debeCambiar?'checked':''}> Pedir que cambie la contraseña al entrar</label></div>
-  <div class="row"><button class="btn v" onclick="guardaU('${id||''}')">💾 Guardar usuario</button><button class="btn s" onclick="cerrar()">Cancelar</button>
-  ${id&&id!==U.id?`<button class="btn r" onclick="borraU('${id}')">🗑 Eliminar</button>`:''}</div>`);
-  if(id===U.id){u_a.disabled=true}
-}
-async function guardaU(id){
-  const usuario=u_u.value.trim(),nombre=u_n.value.trim(),rol=u_r.value,activo=u_a.value==='1';
-  if(!usuario||!nombre) return alert('Complete usuario y nombre.');
-  if(/\s/.test(usuario)) return alert('El usuario no puede tener espacios.');
-  if(DB.usuarios.some(x=>x.usuario.toLowerCase()===usuario.toLowerCase()&&x.id!==id)) return alert('Ya existe un usuario "'+usuario+'".');
-  const prev=DB.usuarios.find(x=>x.id===id);
-  if(prev&&prev.rol==='Admin'&&prev.activo!==false&&(rol!=='Admin'||!activo)&&!adminsActivos(id)) return alert('Debe quedar al menos un Admin activo.');
-  if(!id||u_p.value||u_p2.value){const e=reglaPass(u_p.value,u_p2.value);if(e)return alert(e)}
-  const o=prev||{id:uid(),creado:hoy()};
-  Object.assign(o,{usuario,nombre,rol,activo,tel:u_tel.value.replace(/\D/g,''),debeCambiar:u_dc.checked});
-  if(u_p.value) await setPass(o,u_p.value);
-  if(!prev) DB.usuarios.push(o);
-  if(o.id===U.id) who.textContent=o.nombre+' ('+o.rol+')';
-  audit(`${prev?'Editó':'Creó'} usuario ${usuario} (${rol}${activo?'':', inactivo'})${u_p.value?' – contraseña asignada':''}`);
-  cerrar();R.usuarios();await guardadoOK('Usuario '+usuario);
-}
-function resetPass(id){const u=DB.usuarios.find(x=>x.id===id);
-  modal_(`<h2>🔑 Restablecer contraseña – ${esc(u.usuario)}</h2><div class="grid">
-  <label>Nueva contraseña<input type="password" id="r_p" autocomplete="new-password">${ojo('r_p')}</label><label>Confirmar<input type="password" id="r_p2" autocomplete="new-password"></label></div>
-  <p style="font-size:12px;color:#666">Mínimo 6 caracteres, con letras y números.</p>
-  <label><input type="checkbox" id="r_dc" style="width:auto" checked> Pedir que la cambie al entrar</label>
-  <div class="row"><button class="btn v" onclick="guardaReset('${id}')">💾 Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`)}
-async function guardaReset(id){const e=reglaPass(r_p.value,r_p2.value);if(e)return alert(e);
-  const u=DB.usuarios.find(x=>x.id===id);await setPass(u,r_p.value);u.debeCambiar=r_dc.checked;
-  audit('Restableció contraseña de '+u.usuario);cerrar();R.usuarios();await guardadoOK('Contraseña de '+u.usuario)}
-function borraU(id){const u=DB.usuarios.find(x=>x.id===id);
-  if(id===U.id) return alert('No puede eliminar su propio usuario.');
-  if(u.rol==='Admin'&&u.activo!==false&&!adminsActivos(id)) return alert('Debe quedar al menos un Admin activo.');
-  if(!confirm(`¿Eliminar el usuario "${u.usuario}" (${u.nombre})?\nSu historial de trabajos se conserva.`))return;
-  DB.usuarios=DB.usuarios.filter(x=>x.id!==id);audit('Eliminó usuario '+u.usuario);cerrar();R.usuarios();guardadoOK('Usuario eliminado')}
-function cambiarPass(forzado){
-  modal_(`<h2>🔑 ${forzado?'Debe cambiar su contraseña':'Cambiar mi contraseña'}</h2>
-  ${forzado?'<p style="font-size:13px;background:#fff3cd;padding:8px;border-radius:6px">Por seguridad, cree una contraseña nueva antes de continuar.</p>':''}
-  <label>Contraseña actual<input type="password" id="m_a" autocomplete="current-password"></label>
-  <div class="grid"><label>Nueva contraseña<input type="password" id="m_p" autocomplete="new-password">${ojo('m_p')}</label><label>Confirmar nueva<input type="password" id="m_p2" autocomplete="new-password"></label></div>
-  <p style="font-size:12px;color:#666">Mínimo 6 caracteres, con letras y números.</p>
-  <div class="row"><button class="btn v" onclick="guardaMiPass()">💾 Guardar</button>${forzado?'<button class="btn s" onclick="logout()">Salir</button>':'<button class="btn s" onclick="cerrar()">Cancelar</button>'}</div>`)}
-async function guardaMiPass(){
-  if(!(await passOK(U,m_a.value))) return alert('La contraseña actual no es correcta.');
-  const e=reglaPass(m_p.value,m_p2.value);if(e)return alert(e);
-  if(m_p.value===m_a.value) return alert('La nueva contraseña debe ser diferente a la actual.');
-  await setPass(U,m_p.value);U.debeCambiar=false;audit('Cambió su contraseña');cerrar();
-  if(vista==='usuarios')R.usuarios();await guardadoOK('Contraseña cambiada');
-  popupVencidos(false);
-}
-
-R.datos=()=>{main.innerHTML=`<div class="card"><h2>Respaldo de datos</h2>
-  <p>Los datos se guardan en la base de datos interna del programa (IndexedDB) en este equipo. Haga un respaldo periódico y úselo para pasar los datos a otra PC o al iPhone.</p>
-  <div class="row"><button class="btn" onclick="bajar('mantenipro_respaldo_'+hoy()+'.json',JSON.stringify(DB,null,1),'application/json');audit('Exportó respaldo')">⬇ Descargar respaldo (JSON)</button>
-  <label class="btn s" style="margin:0">⬆ Restaurar respaldo<input type="file" accept=".json" style="display:none" onchange="importar(this)"></label>
-  ${puede(3)?'<button class="btn r" onclick="borrarBD()">Reiniciar sistema</button>':''}</div></div>
-  ${puede(3)?`<div class="card"><h2>🏷️ Empresa y logo</h2>
-  <div class="row" style="align-items:flex-start;gap:20px"><img src="${DB.logo||LOGO_FULL}" style="max-width:160px;max-height:170px;border:1px solid var(--borde);border-radius:8px;padding:6px;background:#fff">
-  <div style="flex:1;min-width:240px"><label>Nombre de la empresa<input id="cf_emp" value="${esc(DB.empresa||'Ferretería Quilvio')}"></label>
-  <div class="row"><button class="btn" onclick="guardaEmpresa()">💾 Guardar nombre</button>
-  <label class="btn s" style="margin:0">🖼️ Cambiar logo<input type="file" accept="image/*" style="display:none" onchange="subirLogo(this)"></label>
-  ${DB.logo?'<button class="btn s" onclick="logoOriginal()">↺ Logo original</button>':''}</div>
-  <p style="font-size:12px;color:#666">PNG o JPG. Se recomienda fondo transparente. El logo se guarda en la base de datos y en el respaldo.</p></div></div></div>`:''}`};
-async function guardaEmpresa(){const v=cf_emp.value.trim();if(!v)return alert('Escriba el nombre');DB.empresa=v;aplicarLogo();audit('Cambió nombre de empresa a '+v);await save();toast('✔ Nombre guardado');R.datos()}
-function subirLogo(inp){const f=inp.files[0];if(!f)return;if(!/^image\//.test(f.type))return alert('Seleccione una imagen');
-  const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=async()=>{
-    const k=Math.min(1,300/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
-    c.getContext('2d').drawImage(img,0,0,c.width,c.height);DB.logo=c.toDataURL('image/png');aplicarLogo();audit('Cambió el logo');await save();toast('✔ Logo guardado');R.datos()};
-    img.onerror=()=>alert('No se pudo leer la imagen');img.src=r.result};r.readAsDataURL(f)}
-async function logoOriginal(){delete DB.logo;aplicarLogo();audit('Restauró logo original');await save();toast('✔ Logo original');R.datos()}
-function importar(inp){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.equipos)throw 0;DB=d;aplicarLogo();audit('Restauró respaldo');save();alert('Respaldo restaurado');go('dash')}catch(e){alert('Archivo inválido')}};r.readAsText(inp.files[0])}
-
-R.audit=()=>{main.innerHTML=`<div class="card"><h2>Auditoría</h2><div class="tw"><table><tr><th>Fecha</th><th>Usuario</th><th>Acción</th></tr>
-  ${DB.log.map(l=>`<tr><td>${l.f}</td><td>${esc(l.u)}</td><td>${esc(l.a)}</td></tr>`).join('')}</table></div></div>`};
-
-/* ===================== WHATSAPP ===================== */
-const WA=()=>DB.wa||(DB.wa={tel:'',auto:false,apikey:'',ultimo:''});
-const otTxt=o=>`• ${o.num} | ${eqN(o.equipoId)} | ${o.descripcion} | Límite ${o.fin}${diff(o.fin)<0?' ⚠️ VENCIDA '+(-diff(o.fin))+'d':''}${eqO(o.equipoId).prioridad>=7?' 🔴 CRÍTICO':''} | Status: ${eqO(o.equipoId).status||'Bajo'}`;
-function msgResumen(){
-  const ab=DB.ots.filter(o=>o.estado!=='Completada'&&diff(o.fin)<=7).sort((a,b)=>a.fin.localeCompare(b.fin));
-  const v=ab.filter(o=>diff(o.fin)<0).length;
-  const al=DB.equipos.filter(e=>e.status==='Alto');
-  return `🔧 *${DB.empresa||'Ferretería Quilvio'} – Alerta de Mantenimiento* (${hoy()})\nVencidas: ${v} | Vencen ≤7 días: ${ab.length-v}\nEquipos status ALTO: ${al.length}${al.length?' ('+al.map(e=>e.nombre).join(', ')+')':''}\n\n`+(ab.map(otTxt).join('\n')||'Sin PM pendientes ✅');
-}
-function abrirWA(tel,txt){
-  tel=(tel||'').replace(/\D/g,'');
-  window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(txt),'_blank');
-  audit('Envió alerta WhatsApp'+(tel?' a '+tel:''));
-}
-function waResumen(){elegirDest(msgResumen())}
-function waOT(id){const o=DB.ots.find(x=>x.id===id);
-  elegirDest(`🔧 *${DB.empresa||'Ferretería Quilvio'} – Orden de Trabajo*\n${otTxt(o)}\nTipo: ${o.tipo} | Crew: ${o.crew}\nFavor completar y registrar en ManteniPro.`)}
-function elegirDest(txt){
-  window._waTxt=txt;
-  const us=DB.usuarios.filter(u=>u.tel);
-  modal_(`<h2>📲 Enviar por WhatsApp</h2><textarea id="w_txt" rows="9">${esc(txt)}</textarea>
-  <label>Enviar a<select id="w_dest"><option value="">Elegir contacto/grupo en WhatsApp</option>
-  ${WA().tel?`<option value="${WA().tel}">Número predeterminado (${WA().tel})</option>`:''}
-  ${us.map(u=>`<option value="${u.tel}">${esc(u.nombre)} (${u.tel})</option>`).join('')}</select></label>
-  <div class="row"><button class="btn v" onclick="abrirWA(w_dest.value,w_txt.value);cerrar()">Abrir WhatsApp</button><button class="btn" onclick="compartir(w_txt.value)">📤 Otras apps</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>
-  <p style="font-size:12px;color:#777">Se abre WhatsApp con el mensaje listo; usted presiona Enviar. "Elegir contacto/grupo" permite enviarlo a un grupo.</p>`);
-}
-R.whats=()=>{const w=WA();
-  main.innerHTML=`<div class="card"><h2>📲 Alertas por WhatsApp</h2>
-  <h3>1. Envío manual (gratis, recomendado)</h3>
-  <p>Use <b>📲 Enviar resumen</b> en el Dashboard o el botón 📲 en cada orden. Los números de técnicos se guardan en <b>Usuarios</b>.</p>
-  <label>Número predeterminado (supervisor o líder, con código país, ej. 16095551234)<input id="w_tel" value="${esc(w.tel)}"></label>
-  <h3>2. Alerta automática diaria (opcional – CallMeBot, gratis)</h3>
-  <p style="font-size:13px">Una vez al día, al abrir ManteniPro, se envía el resumen al número predeterminado. Para obtener la API key: agregue <b>+34 644 51 95 23</b> a sus contactos y envíele por WhatsApp: <code>I allow callmebot to send me messages</code>. Le responderá con su API key.</p>
-  <div class="grid"><label>API key CallMeBot<input id="w_key" value="${esc(w.apikey)}"></label>
-  <label>Alerta automática<select id="w_auto"><option value="0">Desactivada</option><option value="1" ${w.auto?'selected':''}>Activada</option></select></label></div>
-  <p style="font-size:12px">Último envío automático: ${w.ultimo||'nunca'}</p>
-  <div class="row"><button class="btn" onclick="guardaWA()">Guardar</button><button class="btn s" onclick="guardaWA();autoWA(true)">Enviar prueba automática</button>
-  <button class="btn v" onclick="waResumen()">Probar envío manual</button></div></div>`};
-function guardaWA(){const w=WA();w.tel=w_tel.value.replace(/\D/g,'');w.apikey=w_key.value.trim();w.auto=w_auto.value==='1';audit('Configuró WhatsApp');save();alert('Guardado')}
-function autoWA(forzar){const w=WA();
-  if(!w.tel||!w.apikey) return forzar&&alert('Falta número predeterminado o API key');
-  if(!forzar&&(!w.auto||w.ultimo===hoy())) return;
-  fetch('https://api.callmebot.com/whatsapp.php?phone='+w.tel+'&apikey='+encodeURIComponent(w.apikey)+'&text='+encodeURIComponent(msgResumen()),{mode:'no-cors'})
-   .then(()=>{w.ultimo=hoy();audit('Alerta automática WhatsApp enviada a '+w.tel);save();forzar&&alert('Enviado. Revise su WhatsApp.')})
-   .catch(()=>forzar&&alert('Sin conexión a internet'));
-}
-
-/* ===================== BORRAR OT ===================== */
+  <p>Repuestos: ${esc(o.repuestos||'-')}${o.costo?' · $'+(+o.costo).toFixed(2):''}</p><p>Notas: ${esc(o.notas||'-')}</p>${(o.checklist||[]).map(c=>'<div>'+esc(c)+'</div>').join('')}
+  <p style="font-size:12px;color:#777">Registrado por ${esc(o.cerradoPor)} – ${o.cerradoEn}</p>
+  <div class="row"><button class="btn" onclick="compartirOT('${o.id}')">📤 Compartir reporte</button><button class="btn r" onclick="borrarOT('${o.id}')">🗑 Borrar registro</button><button class="btn s" onclick="cerrar()">Cerrar</button></div>`)}
 function borrarOT(id){
   const o=DB.ots.find(x=>x.id===id);if(!o)return;
-  const comp=o.estado==='Completada';
-  if(comp&&!puede(3)) return alert('Solo un Admin puede borrar registros completados.');
-  if(!comp&&!puede(2)) return alert('Solo Supervisor o Admin pueden borrar órdenes.');
-  const pm=!comp&&o.planId&&DB.planes.some(p=>p.id===o.planId&&p.activo);
+  const comp=o.estado==='Completada',pm=!comp&&o.planId&&DB.planes.some(p=>p.id===o.planId&&p.activo);
   modal_(`<h2>🗑 Borrar ${comp?'registro':'orden'} ${o.num}</h2>
    <p><b>${esc(eqN(o.equipoId))}</b> – ${esc(o.descripcion)} (${o.tipo}, ${comp?'completada '+o.cierre:'límite '+o.fin})</p>
    ${comp?'<p style="color:var(--rojo)"><b>Atención:</b> se borrará del Historial y de la Base de Datos.</p>':''}
@@ -554,95 +607,70 @@ function borrarOT(id){
    <label>Motivo (obligatorio)<select id="d_mot"><option value="">-- Seleccione --</option><option>Duplicada</option><option>Creada por error</option><option>Equipo dado de baja</option><option>Trabajo cancelado</option><option>Otro</option></select></label>
    <label>Detalle<input id="d_det" placeholder="opcional"></label>
    <label><input type="checkbox" id="d_ok" style="width:auto"> Confirmo que deseo borrar ${o.num}. Esta acción no se puede deshacer.</label>
-   <div class="row"><button class="btn r" onclick="confirmaBorrarOT('${id}')">🗑 Borrar</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
+   <div class="row"><button class="btn r" id="d_btn" onclick="confirmaBorrarOT('${id}')">🗑 Borrar</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
 }
 function confirmaBorrarOT(id){
-  if(!d_mot.value) return alert('Seleccione el motivo.');
-  if(!d_ok.checked) return alert('Marque la casilla de confirmación.');
-  const o=DB.ots.find(x=>x.id===id);
-  DB.ots=DB.ots.filter(x=>x.id!==id);
+  if(!d_mot.value)return alert('Seleccione el motivo.');
+  if(!d_ok.checked)return alert('Marque la casilla de confirmación.');
+  const o=DB.ots.find(x=>x.id===id);DB.ots=DB.ots.filter(x=>x.id!==id);
   audit(`Borró ${o.estado==='Completada'?'registro':'OT'} ${o.num} (${eqN(o.equipoId)} – ${o.descripcion}) · Motivo: ${d_mot.value}${d_det.value?' – '+d_det.value:''}`);
-  save();cerrar();go(vista);
+  cerrar();go(vista);
 }
 
-/* ===================== POP-UP VENCIDOS ===================== */
-const vencidas=()=>DB.ots.filter(o=>o.estado!=='Completada'&&diff(o.fin)<0).sort((a,b)=>(eqO(b.equipoId).prioridad||0)-(eqO(a.equipoId).prioridad||0)||a.fin.localeCompare(b.fin));
-function bellVenc(){const n=vencidas().length;bellV.style.display=n?'inline-block':'none';bellV.textContent='⚠️ '+n+' vencido'+(n===1?'':'s')}
-function popupVencidos(forzar){
-  bellVenc();
-  const l=vencidas(),k='mp_popv_'+U.id;
-  if(!l.length){if(forzar)alert('✅ No hay mantenimientos vencidos.');return}
-  const firma=hoy()+'|'+l.map(o=>o.id).join(',');
-  if(!forzar&&localStorage.getItem(k)===firma)return;
-  const crit=l.filter(o=>eqO(o.equipoId).prioridad>=7).length;
-  modal_(`<h2 style="color:var(--rojo)">⚠️ Mantenimiento vencido</h2>
-   <p>Hay <b>${l.length}</b> mantenimiento${l.length===1?'':'s'} vencido${l.length===1?'':'s'}${crit?` · <span class="tag t-r">${crit} CRÍTICO${crit===1?'':'S'}</span>`:''}</p>
-   <div class="tw" style="max-height:45vh"><table><tr><th>OT</th><th>Equipo</th><th>Descripción</th><th>Límite</th><th>Atraso</th><th></th></tr>
-   ${l.map(o=>`<tr><td>${o.num}</td><td>${esc(eqN(o.equipoId))} ${eqO(o.equipoId).prioridad>=7?'<span class="tag t-r">CRÍTICO</span>':''}</td><td>${esc(o.descripcion)}</td><td>${o.fin}</td>
-   <td><span class="tag t-r">${-diff(o.fin)} día${-diff(o.fin)===1?'':'s'}</span></td>
-   <td>${`<button class="btn sm v" onclick="cerrarOT('${o.id}')">Completar</button>`}</td></tr>`).join('')}</table></div>
-   <label style="margin-top:10px"><input type="checkbox" id="pv_hoy" style="width:auto"> No volver a mostrar hoy (salvo que venza otro mantenimiento)</label>
-   <div class="row"><button class="btn" onclick="cerrarPopV();go('ots')">📋 Ver órdenes</button>
-   <button class="btn v" onclick="cerrarPopV();waResumen()">📲 Avisar por WhatsApp</button>
-   <button class="btn s" onclick="cerrarPopV();compartir(msgResumen(),'Mantenimiento vencido')">📤 Compartir</button>
-   <button class="btn s" onclick="cerrarPopV()">Cerrar</button></div>`);
-  document.querySelector('#modal .card').classList.add('alerta-v');
-  document.querySelector('#modal .card').style.maxWidth='860px';
-  window._popFirma=firma;audit(`Alerta de ${l.length} mantenimiento(s) vencido(s) mostrada`);
-}
-function cerrarPopV(){
-  if(document.getElementById('pv_hoy')&&pv_hoy.checked)localStorage.setItem('mp_popv_'+U.id,window._popFirma);
-  cerrar();
+/* ---------- HISTORIAL ---------- */
+R.hist=(eid)=>{
+  const l=DB.ots.filter(o=>o.estado==='Completada'&&(!eid||o.equipoId===eid)).sort((a,b)=>b.cierre.localeCompare(a.cierre));
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">📚 Historial de mantenimiento ${eid?'– '+esc(eqN(eid)):''}</h2>
+  <button class="btn s" onclick="csvHist()">⬇ Exportar CSV</button></div>
+  <div class="tw"><table><tr><th>OT</th><th>Fecha</th><th>Equipo</th><th>Descripción</th><th>Tipo</th><th>Realizado por</th><th>Horas</th><th>Resultado</th><th></th></tr>
+  ${l.map(o=>`<tr><td>${o.num}</td><td>${o.cierre}</td><td>${esc(eqN(o.equipoId))}</td><td>${esc(o.descripcion)}</td><td>${o.tipo}</td><td>${esc(o.tecnico)}</td><td>${o.horas}</td><td>${esc(o.resultado)}</td>
+  <td style="white-space:nowrap"><button class="btn sm s" onclick="verOT('${o.id}')">Ver</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button> <button class="btn sm r" title="Borrar" onclick="borrarOT('${o.id}')">🗑</button></td></tr>`).join('')||'<tr><td colspan="9">Sin registros.</td></tr>'}</table></div></div>`;
+};
+function histEq(id){go('hist');R.hist(id)}
+function csvHist(){
+  const rows=[['OT','Fecha','Equipo','Descripcion','Tipo','Crew','Tecnico','Horas','Resultado','Repuestos','Costo','Notas']].concat(
+   DB.ots.filter(o=>o.estado==='Completada').map(o=>[o.num,o.cierre,eqN(o.equipoId),o.descripcion,o.tipo,o.crew,o.tecnico,o.horas,o.resultado,o.repuestos,o.costo,o.notas]));
+  bajar('historial_mantenimiento_'+hoy()+'.csv','\ufeff'+rows.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv');
 }
 
-/* ===================== COMPARTIR ===================== */
-function txtOT(o){
-  if(o.estado==='Completada') return `✅ *${DB.empresa||'Ferretería Quilvio'} – Reporte de Mantenimiento*\nOT ${o.num} | ${eqN(o.equipoId)}\n${o.descripcion} (${o.tipo}, ${o.crew})\nRealizado por: ${o.tecnico} el ${o.cierre} · ${o.horas} h\nResultado: ${o.resultado}\nRepuestos: ${o.repuestos||'-'}\nNotas: ${o.notas||'-'}`+((o.checklist||[]).length?'\n'+o.checklist.join('\n'):'');
-  return `🔧 *${DB.empresa||'Ferretería Quilvio'} – Orden de Trabajo*\n${otTxt(o)}\nTipo: ${o.tipo} | Crew: ${o.crew}\nFavor completar y registrar en ManteniPro.`;
-}
-function compartirOT(id){const o=DB.ots.find(x=>x.id===id);compartir(txtOT(o),'ManteniPro '+o.num)}
-function compartir(txt,asunto){
-  window._shTxt=txt;window._shAs=asunto||'ManteniPro – Mantenimiento';
-  modal_(`<h2>📤 Compartir mensaje</h2><textarea id="sh_txt" rows="9">${esc(txt)}</textarea>
-  <div class="row" style="margin-top:10px">
-   ${navigator.share?'<button class="btn" onclick="shNativo()">📱 Compartir…</button>':''}
-   <button class="btn v" onclick="shAbrir(\'wa\')">📲 WhatsApp</button>
-   <button class="btn" style="background:#5b5fc7" onclick="shAbrir(\'teams\')">💬 Teams</button>
-   <button class="btn" onclick="shAbrir(\'mail\')">✉️ Correo</button>
-   <button class="btn" onclick="shAbrir(\'sms\')">💭 SMS</button>
-   <button class="btn s" onclick="shCopiar()">📋 Copiar</button>
-   <button class="btn s" onclick="cerrar()">Cerrar</button></div>
-  <p id="sh_ok" style="font-size:12px;color:var(--verde)"></p>
-  <p style="font-size:12px;color:#777">Puede editar el texto antes de compartir. "Compartir…" usa el menú del teléfono o de Windows.</p>`);
-}
-function shAbrir(m){
-  const t=sh_txt.value,e=encodeURIComponent(t),a=encodeURIComponent(window._shAs);
-  const url={wa:'https://wa.me/?text='+e,teams:'https://teams.microsoft.com/share?msgText='+e,mail:'mailto:?subject='+a+'&body='+e,sms:'sms:?&body='+e}[m];
-  if(m==='mail'||m==='sms') location.href=url; else window.open(url,'_blank');
-  audit('Compartió mensaje por '+{wa:'WhatsApp',teams:'Teams',mail:'Correo',sms:'SMS'}[m]);
-}
-async function shNativo(){
-  try{await navigator.share({title:window._shAs,text:sh_txt.value});audit('Compartió mensaje (menú del sistema)')}catch(e){}
-}
-async function shCopiar(){
-  const t=sh_txt.value;
-  try{await navigator.clipboard.writeText(t)}catch(e){sh_txt.select();document.execCommand('copy')}
-  sh_ok.textContent='✔ Copiado. Péguelo donde quiera (Ctrl+V).';audit('Copió mensaje');
-}
+/* ---------- AUDITORÍA ---------- */
+R.audit=()=>{main.innerHTML=`<div class="card"><h2>🔒 Auditoría</h2><div class="tw"><table><tr><th>Fecha</th><th>Usuario</th><th>Acción</th></tr>
+  ${DB.log.slice(0,1000).map(l=>`<tr><td>${esc(l.f)}</td><td>${esc(l.u)}</td><td>${esc(l.a)}</td></tr>`).join('')}</table></div></div>`};
 
 /* ===================== BASE DE DATOS / REGISTROS ===================== */
 const regs=()=>DB.ots.filter(o=>o.estado==='Completada');
 R.bd=()=>{
   const tecs=[...new Set(regs().map(o=>o.tecnico).filter(Boolean))].sort();
   main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">🗄️ Base de Datos – Registros de Mantenimiento</h2>
-   <button class="btn" onclick="nuevoReg()">+ Nuevo registro</button><button class="btn v" onclick="exportXLSX()">⬇ Exportar Base de Datos a Excel</button></div>
+   <button class="btn" onclick="nuevoReg()">+ Nuevo registro</button><button class="btn v" onclick="exportXLSX()">⬇ Exportar a Excel</button></div>
   <div class="grid"><label>Desde<input type="date" id="b_d" onchange="R.bd2()"></label><label>Hasta<input type="date" id="b_h" onchange="R.bd2()"></label>
   <label>Equipo<select id="b_e" onchange="R.bd2()"><option value="">Todos</option>${DB.equipos.map(e=>`<option value="${e.id}">${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select></label>
   <label>Técnico<select id="b_t" onchange="R.bd2()"><option value="">Todos</option>${tecs.map(t=>`<option>${esc(t)}</option>`).join('')}</select></label>
   <label>Tipo<select id="b_ti" onchange="R.bd2()"><option value="">PM y CM</option><option>PM</option><option>CM</option></select></label>
   <label>Buscar<input id="b_q" oninput="R.bd2()" placeholder="texto, OT, notas..."></label></div>
-  <div class="kpis" id="b_k"></div><div id="b_tab"></div></div>${puede(2)?'<div class="card" id="b_motor"></div>':''}`;R.bd2();puede(2)&&motorBD();
+  <div class="kpis" id="b_k"></div><div id="b_tab"></div></div>
+  <div class="card"><h2>☁️ Base de datos en la nube</h2><div class="grid" style="font-size:13px">
+   <div><b>Servicio:</b> Supabase</div><div><b>Proyecto:</b> ${esc(CFG().url.replace(/^https?:\/\//,''))}</div>
+   <div><b>Cuenta:</b> ${esc(SES.email)}</div><div><b>Versión de los datos:</b> ${VER}</div>
+   <div><b>Estado:</b> ${{ok:'<span class="tag t-v">Guardado</span>',pend:'<span class="tag t-a">Guardando…</span>',off:'<span class="tag t-r">Sin conexión</span>'}[ESTADO]}</div>
+   <div><b>Registros:</b> ${DB.equipos.length} equipos · ${DB.planes.length} planes · ${DB.ots.length} órdenes</div></div>
+   <div class="row" style="margin-top:10px"><button class="btn s" onclick="revisarNube().then(()=>toast('✔ Sincronizado'))">🔄 Sincronizar ahora</button><button class="btn s" onclick="integridadBD()">🩺 Verificar integridad</button></div></div>
+  <div class="card" style="background:#f8fafc;margin-top:10px"><b>🗂️ Tablas en la nube</b>
+   <p style="font-size:12px;color:#666;margin:4px 0">Cada equipo y cada orden de trabajo también se guarda como una fila en las tablas <b>equipos</b> y <b>ordenes</b> de Supabase (Table Editor), para verlas, filtrarlas o exportarlas a CSV.</p>
+   <div id="b_tabs" style="font-size:13px">Consultando…</div>
+   <div class="row" style="margin-top:8px"><button class="btn s" onclick="subirTablas()">⬆ Subir todo a las tablas</button>
+   <a class="btn s" style="text-decoration:none" target="_blank" href="https://supabase.com/dashboard/project/${encodeURIComponent((CFG().url.match(/\/\/([^.]+)\./)||[])[1]||'')}/editor">🔗 Abrir en Supabase</a></div></div>`;R.bd2();infoTablas();
 };
+async function infoTablas(){
+  const el=()=>document.getElementById('b_tabs');let txt;
+  try{const [e,o]=await Promise.all(['equipos','ordenes'].map(t=>sb(`/rest/v1/${t}?select=id&user_id=eq.${SES.uid}`)));
+    txt=`<span class="tag ${ESPEJO.ok===false?'t-r':'t-v'}">${ESPEJO.ok===false?'Error':'OK'}</span> <b>equipos:</b> ${e.length} filas · <b>ordenes:</b> ${o.length} filas`+(ESPEJO.ult?` · última actualización ${esc(ESPEJO.ult)}`:'')+(ESPEJO.ok===false?`<br><span style="color:var(--rojo)">${esc(ESPEJO.msg)}</span>`:'');}
+  catch(x){txt=`<span class="tag t-r">No disponibles</span> <span style="color:var(--rojo)">${x.status===404||/PGRST205|schema cache|does not exist/i.test(x.message)?'Faltan las tablas "equipos" y "ordenes" en Supabase. Ejecute de nuevo supabase_setup.sql (SQL Editor → Run).':esc(x.status?x.message:'Sin conexión')}</span>`}
+  if(el())el().innerHTML=txt;
+}
+async function subirTablas(){toast('Subiendo equipos y órdenes…','#1565c0');await espejo(DB,true);
+  if(ESPEJO.ok){audit('Subió todas las tablas (equipos y órdenes) a la nube');toast(`✔ ${DB.equipos.length} equipos y ${DB.ots.length} órdenes en la nube`)}else alert('No se pudo: '+ESPEJO.msg);
+  if(vista==='bd')R.bd()}
 function filtroRegs(){
   const d=b_d.value,h=b_h.value,e=b_e.value,t=b_t.value,ti=b_ti.value,q=b_q.value.toLowerCase();
   return regs().filter(o=>(!d||o.cierre>=d)&&(!h||o.cierre<=h)&&(!e||o.equipoId===e)&&(!t||o.tecnico===t)&&(!ti||o.tipo===ti)&&(!q||(o.num+' '+eqN(o.equipoId)+' '+o.descripcion+' '+(o.notas||'')+' '+(o.repuestos||'')).toLowerCase().includes(q)))
@@ -656,7 +684,7 @@ R.bd2=()=>{
   b_tab.innerHTML=`<div class="tw"><table><tr><th>N° Registro</th><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Descripción</th><th>Técnico</th><th>Horas</th><th>Resultado</th><th>Repuestos</th><th>Costo</th><th></th></tr>
   ${l.map(o=>`<tr><td>${o.num}</td><td>${o.cierre}</td><td>${esc(eqN(o.equipoId))}</td><td>${o.tipo}</td><td>${esc(o.descripcion)}</td><td>${esc(o.tecnico)}</td><td>${o.horas}</td>
   <td>${o.resultado==='Requiere seguimiento'?'<span class="tag t-r">Requiere seguimiento</span>':esc(o.resultado)}</td><td>${esc(o.repuestos||'')}</td><td>${o.costo?'$'+(+o.costo).toFixed(2):''}</td>
-  <td><button class="btn sm s" onclick="verOT('${o.id}')">Ver</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button>${puede(3)?` <button class="btn sm r" title="Borrar" onclick="borrarOT('${o.id}')">🗑</button>`:''}</td></tr>`).join('')||'<tr><td colspan="11">Sin registros con estos filtros.</td></tr>'}</table></div>`;
+  <td style="white-space:nowrap"><button class="btn sm s" onclick="verOT('${o.id}')">Ver</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button> <button class="btn sm r" title="Borrar" onclick="borrarOT('${o.id}')">🗑</button></td></tr>`).join('')||'<tr><td colspan="11">Sin registros con estos filtros.</td></tr>'}</table></div>`;
 };
 function nuevoReg(){
   modal_(`<h2>Nuevo registro de mantenimiento</h2><p style="font-size:12px;color:#666">Para trabajos ya realizados que no tenían orden en el sistema.</p><div class="grid">
@@ -671,56 +699,28 @@ function nuevoReg(){
   <div class="row"><button class="btn v" onclick="guardaReg()">Guardar registro</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
 }
 function guardaReg(){
-  if(!n_d.value.trim()) return alert('Escriba la descripción del trabajo');
-  if(!n_tec.value.trim()) return alert('Escriba el técnico');
-  if(n_f.value>hoy()) return alert('La fecha no puede ser futura');
+  if(!n_d.value.trim())return alert('Escriba la descripción del trabajo');
+  if(!n_tec.value.trim())return alert('Escriba el técnico');
+  if(n_f.value>hoy())return alert('La fecha no puede ser futura');
   const o={id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:n_eq.value,tipo:n_ti.value,descripcion:n_d.value.trim(),crew:n_cr.value,inicio:n_f.value,fin:n_f.value,
-   estado:'Completada',asignado:'',creada:new Date().toLocaleString(),tecnico:n_tec.value.trim(),cierre:n_f.value,horas:+n_h.value||0,resultado:n_res.value,
+   estado:'Completada',asignado:'',creada:new Date().toLocaleString(),tecnico:n_tec.value.trim(),cierre:n_f.value||hoy(),horas:+n_h.value||0,resultado:n_res.value,
    repuestos:n_r.value,costo:+n_c.value||0,notas:n_n.value,checklist:[],cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString(),manual:true};
-  DB.ots.push(o);audit(`Registro manual ${o.num} (${eqN(o.equipoId)}) – técnico: ${o.tecnico}`);save();cerrar();R.bd();
-}
-/* ---- Panel del motor de base de datos ---- */
-const NOMT={equipos:'Equipos',planes:'Planes PM',ots:'Órdenes / Registros',usuarios:'Usuarios',log:'Auditoría'};
-async function motorBD(){
-  let est='',per='';
-  try{const e=await navigator.storage.estimate();est=(e.usage/1024).toFixed(1)+' KB usados de '+(e.quota/1048576).toFixed(0)+' MB disponibles'}catch(x){est='n/d'}
-  try{per=await navigator.storage.persisted()?'<span class="tag t-v">Persistente</span>':'<span class="tag t-a">Normal</span>'}catch(x){per='n/d'}
-  const tam=t=>(new Blob([JSON.stringify(DB[t])]).size/1024).toFixed(1);
-  b_motor.innerHTML=`<div class="row"><h2 style="flex:1">⚙️ Base de datos interna</h2>
-   <button class="btn s" onclick="integridadBD()">🩺 Verificar integridad</button>
-   <button class="btn s" onclick="bajar('mantenipro_respaldo_'+hoy()+'.json',JSON.stringify(DB,null,1),'application/json');audit('Exportó respaldo')">💾 Respaldo JSON</button></div>
-   <div class="grid" style="font-size:13px"><div><b>Motor:</b> ${IDB?'IndexedDB – "'+DBNAME+'"':'<span class="tag t-a">localStorage (modo compatible)</span>'}</div>
-   <div><b>Espacio:</b> ${est}</div><div><b>Almacenamiento:</b> ${per}</div><div><b>Último guardado:</b> ${ULTIMO_GUARDADO||'-'}</div></div>
-   <table style="margin-top:10px"><tr><th>Tabla</th><th>Registros</th><th>Tamaño (KB)</th><th></th></tr>
-   ${Object.keys(NOMT).map(t=>`<tr><td>${NOMT[t]} <small style="color:#888">(${t})</small></td><td>${DB[t].length}</td><td>${tam(t)}</td>
-   <td><button class="btn sm s" onclick="verTabla('${t}')">Ver tabla</button></td></tr>`).join('')}</table>`;
-}
-function verTabla(t){
-  const filas=DB[t].slice(0,300).map(x=>{const y={...x};delete y.pass;if(y.checklist)y.checklist=y.checklist.length+' ítems';if(y.tareas)y.tareas=y.tareas.split('\n').length+' tareas';return y});
-  const cols=[...new Set(filas.flatMap(Object.keys))].filter(c=>c!=='id');
-  modal_(`<h2>Tabla: ${NOMT[t]} (${DB[t].length} registros)</h2>${DB[t].length>300?'<p style="font-size:12px">Mostrando los primeros 300.</p>':''}
-   <div class="tw" style="max-height:60vh"><table><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>
-   ${filas.map(f=>`<tr>${cols.map(c=>`<td>${esc(c==='equipoId'?eqN(f[c]):typeof f[c]==='object'&&f[c]!==null?JSON.stringify(f[c]):f[c])}</td>`).join('')}</tr>`).join('')||'<tr><td>Vacía</td></tr>'}</table></div>
-   <div class="row"><button class="btn s" onclick="cerrar()">Cerrar</button></div>`);
-  document.querySelector('#modal .card').style.maxWidth='1100px';
+  DB.ots.push(o);audit(`Registro manual ${o.num} (${eqN(o.equipoId)}) – técnico: ${o.tecnico}`);cerrar();R.bd();
 }
 function integridadBD(){
   const ids=new Set(DB.equipos.map(e=>e.id)),p=[];
-  const dupC=DB.equipos.map(e=>e.codigo).filter((c,i,a)=>a.indexOf(c)!==i);
-  if(dupC.length)p.push('Códigos de equipo duplicados: '+[...new Set(dupC)].join(', '));
+  const dupC=DB.equipos.map(e=>e.codigo).filter((c,i,a)=>a.indexOf(c)!==i);if(dupC.length)p.push('Códigos de equipo duplicados: '+[...new Set(dupC)].join(', '));
   const pl=DB.planes.filter(x=>!ids.has(x.equipoId));if(pl.length)p.push(pl.length+' plan(es) PM sin equipo');
   const ot=DB.ots.filter(x=>!ids.has(x.equipoId));if(ot.length)p.push(ot.length+' orden(es)/registro(s) con equipo eliminado');
   const dn=DB.ots.map(o=>o.num).filter((c,i,a)=>a.indexOf(c)!==i);if(dn.length)p.push('Números de OT duplicados: '+[...new Set(dn)].join(', '));
-  const sl=DB.ots.filter(o=>o.estado==='Completada'&&(!o.tecnico||!o.cierre));if(sl.length)p.push(sl.length+' registro(s) completados sin técnico o fecha');
   const se=DB.equipos.filter(e=>!e.status);if(se.length)p.push(se.length+' equipo(s) sin status');
   audit('Verificó integridad de la base de datos: '+(p.length?p.length+' problema(s)':'OK'));
-  alert(p.length?'⚠️ Problemas encontrados:\n\n• '+p.join('\n• '):'✅ Base de datos íntegra: sin problemas.\n\n'+DB.equipos.length+' equipos · '+DB.planes.length+' planes · '+DB.ots.length+' órdenes/registros · '+DB.usuarios.length+' usuarios');
+  alert(p.length?'⚠️ Problemas encontrados:\n\n• '+p.join('\n• '):'✅ Base de datos íntegra: sin problemas.');
 }
-
-/* ---- Exportar XLSX real (sin librerías) ---- */
+/* ---- Exportar XLSX (sin librerías) ---- */
 const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
 function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
-function zip(files){
+function zipXLSX(files){
   const enc=new TextEncoder(),parts=[],cen=[];let off=0;
   const u16=v=>[v&255,(v>>8)&255],u32=v=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
   for(const [name,txt] of files){
@@ -739,50 +739,190 @@ const xe=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','
 function hojaXML(rows,anchos){
   const cols='<cols>'+anchos.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')+'</cols>';
   const data=rows.map((r,ri)=>`<row r="${ri+1}">`+r.map((v,ci)=>{const ref=colL(ci)+(ri+1),s=ri===0?' s="1"':'';
-    if(v===null||v===undefined||v==='') return ri===0?`<c r="${ref}"${s}/>`:'';
-    if(typeof v==='number'&&isFinite(v)) return `<c r="${ref}"${s}><v>${v}</v></c>`;
+    if(v===null||v===undefined||v==='')return ri===0?`<c r="${ref}"${s}/>`:'';
+    if(typeof v==='number'&&isFinite(v))return `<c r="${ref}"${s}><v>${v}</v></c>`;
     return `<c r="${ref}" t="inlineStr"${s}><is><t xml:space="preserve">${xe(v)}</t></is></c>`}).join('')+'</row>').join('');
-  const last=colL(rows[0].length-1)+rows.length;
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>${cols}<sheetData>${data}</sheetData><autoFilter ref="A1:${last}"/></worksheet>`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>${cols}<sheetData>${data}</sheetData><autoFilter ref="A1:${colL(rows[0].length-1)+rows.length}"/></worksheet>`;
 }
 function libroXLSX(hojas){
-  const ws=hojas.map((h,i)=>[`xl/worksheets/sheet${i+1}.xml`,hojaXML(h.rows,h.w)]);
   const f=[['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${hojas.map((h,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],
    ['_rels/.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
    ['xl/workbook.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${hojas.map((h,i)=>`<sheet name="${xe(h.n)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets></workbook>`],
    ['xl/_rels/workbook.xml.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${hojas.map((h,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
    ['xl/styles.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Arial"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0B3D91"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="2"><xf fontId="0" fillId="0" borderId="0"/><xf fontId="1" fillId="2" borderId="0" applyFont="1" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`],
-   ...ws];
-  return zip(f);
+   ...hojas.map((h,i)=>[`xl/worksheets/sheet${i+1}.xml`,hojaXML(h.rows,h.w)])];
+  return zipXLSX(f);
 }
 function exportXLSX(){
-  const l=document.getElementById('b_d')?filtroRegs():regs();
-  const eqC=id=>(eqO(id).codigo||'');
+  const l=document.getElementById('b_d')?filtroRegs():regs(),eqC=id=>(eqO(id).codigo||'');
   const hojas=[
    {n:'Registros',w:[12,12,16,32,8,40,11,22,8,22,26,12,40,18],rows:[['N° Registro','Fecha','Código Equipo','Equipo','Tipo','Descripción del trabajo','Crew','Técnico','Horas','Resultado','Repuestos usados','Costo repuestos ($)','Hallazgos / Notas','Registrado por'],
      ...l.map(o=>[o.num,o.cierre,eqC(o.equipoId),eqN(o.equipoId),o.tipo,o.descripcion,o.crew,o.tecnico,+o.horas||0,o.resultado,o.repuestos||'',+o.costo||0,o.notas||'',o.cerradoPor||''])]},
    {n:'Equipos',w:[16,36,22,32,14,14,10,10,18],rows:[['Código','Nombre','Tipo','Ubicación','Marca','Serie','Prioridad','Status','Estado'],...DB.equipos.map(e=>[e.codigo,e.nombre,e.tipo,e.ubicacion,e.marca,e.serie,e.prioridad,e.status,e.estado])]},
    {n:'Planes_PM',w:[16,34,48,12,12,14,14,12],rows:[['Código Equipo','Equipo','Descripción PM','Frecuencia (días)','Crew','Última realización','Próximo PM','Activo'],...DB.planes.map(p=>[eqC(p.equipoId),eqN(p.equipoId),p.descripcion,p.frecuencia,p.crew,p.ultima,prox(p),p.activo?'Sí':'No'])]},
    {n:'OT_Abiertas',w:[10,16,32,40,8,11,12,12,12],rows:[['OT','Código Equipo','Equipo','Descripción','Tipo','Crew','Inicio','Límite','Estado'],...DB.ots.filter(o=>o.estado!=='Completada').map(o=>[o.num,eqC(o.equipoId),eqN(o.equipoId),o.descripcion,o.tipo,o.crew,o.inicio,o.fin,o.estado])]}];
-  const b=libroXLSX(hojas),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ManteniPro_BaseDatos_'+hoy()+'.xlsx';a.click();
-  audit(`Exportó base de datos a Excel (${l.length} registros)`);
+  bajar('ManteniPro_BaseDatos_'+hoy()+'.xlsx',libroXLSX(hojas));audit(`Exportó base de datos a Excel (${l.length} registros)`);
 }
 
-/* ===================== UTILIDADES ===================== */
-function modal_(h){const c=document.querySelector('#modal .card');c.classList.remove('alerta-v');c.style.maxWidth='';mbody.innerHTML=h;modal.style.display='flex'}
-function cerrar(){modal.style.display='none'}
-function bajar(n,txt,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:t}));a.download=n;a.click()}
-lp.addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-function addBaterias(){
-  if(DB.equipos.some(e=>e.codigo==='BATLVL1')) return;
-  const e={id:uid(),codigo:'BATLVL1',nombre:'Medidor de Nivel de Líquido de Baterías',tipo:'Instrumento – Baterías',ubicacion:'FLR – Cuarto de Carga de Baterías',prioridad:7,marca:'',serie:'',estado:'Operativo',status:'Bajo'};
-  DB.equipos.push(e);
-  DB.planes.push({id:uid(),equipoId:e.id,descripcion:'Inspección Nivel de Líquido (Electrolito) de Baterías – CRITICAL',frecuencia:7,crew:'EMT',activo:true,ultima:hoy(),
-   tareas:['EPP: careta, gafas y guantes resistentes a ácido','Verificar lavaojos/ducha de emergencia y ventilación del área','Batería completamente cargada antes de rellenar','Medir nivel en cada celda con el medidor','Nivel correcto: sobre las placas, sin pasar el indicador de llenado','Rellenar solo con agua destilada; no sobrellenar','Registrar celdas con nivel bajo y la densidad si aplica','Revisar corrosión, fugas y conexiones','Verificar calibración/funcionamiento del medidor'].join('\n')});
-  if(typeof audit==='function') DB.log.unshift({f:new Date().toLocaleString(),u:'Sistema',a:'Agregó equipo BATLVL1 – Medidor de Nivel de Líquido de Baterías'});
+/* ===================== WHATSAPP ===================== */
+const WA=()=>DB.wa||(DB.wa={tel:'',auto:false,apikey:'',ultimo:''});
+const EMP=()=>DB.empresa||'Ferretería Quilvio';
+const otTxt=o=>`• ${o.num} | ${eqN(o.equipoId)} | ${o.descripcion} | Límite ${o.fin}${diff(o.fin)<0?' ⚠️ VENCIDA '+(-diff(o.fin))+'d':''}${eqO(o.equipoId).prioridad>=7?' 🔴 CRÍTICO':''} | Status: ${eqO(o.equipoId).status||'Bajo'}`;
+function msgResumen(){
+  const ab=DB.ots.filter(o=>o.estado!=='Completada'&&diff(o.fin)<=7).sort((a,b)=>a.fin.localeCompare(b.fin));
+  const v=ab.filter(o=>diff(o.fin)<0).length,al=DB.equipos.filter(e=>e.status==='Alto');
+  return `🔧 *${EMP()} – Alerta de Mantenimiento* (${hoy()})\nVencidas: ${v} | Vencen ≤7 días: ${ab.length-v}\nEquipos status ALTO: ${al.length}${al.length?' ('+al.map(e=>e.nombre).join(', ')+')':''}\n\n`+(ab.map(otTxt).join('\n')||'Sin PM pendientes ✅');
 }
-(async()=>{await listo;aplicarLogo();const s=sessionStorage.getItem('mp_u');if(s){U=DB.usuarios.find(u=>u.id===s&&u.activo!==false);if(U){start();if(U.debeCambiar)setTimeout(()=>cambiarPass(true),50)}}})();
-if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js');
+function abrirWA(tel,txt){tel=(tel||'').replace(/\D/g,'');window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(txt),'_blank');audit('Envió alerta WhatsApp'+(tel?' a '+tel:''))}
+function waResumen(){elegirDest(msgResumen())}
+function waOT(id){elegirDest(txtOT(DB.ots.find(x=>x.id===id)))}
+function elegirDest(txt){
+  const cs=(WA().contactos||'').split('\n').map(l=>l.split(',')).filter(x=>x[1]&&x[1].replace(/\D/g,''));
+  modal_(`<h2>📲 Enviar por WhatsApp</h2><textarea id="w_txt" rows="9">${esc(txt)}</textarea>
+  <label>Enviar a<select id="w_dest"><option value="">Elegir contacto/grupo en WhatsApp</option>
+  ${WA().tel?`<option value="${WA().tel}">Número predeterminado (${WA().tel})</option>`:''}
+  ${cs.map(c=>`<option value="${c[1].replace(/\D/g,'')}">${esc(c[0].trim())} (${c[1].replace(/\D/g,'')})</option>`).join('')}</select></label>
+  <div class="row"><button class="btn v" onclick="abrirWA(w_dest.value,w_txt.value);cerrar()">Abrir WhatsApp</button><button class="btn" onclick="compartir(w_txt.value)">📤 Otras apps</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>
+  <p style="font-size:12px;color:#777">Se abre WhatsApp con el mensaje listo; usted presiona Enviar.</p>`);
+}
+R.whats=()=>{const w=WA();
+  main.innerHTML=`<div class="card"><h2>📲 Alertas por WhatsApp</h2>
+  <h3>1. Envío manual (gratis)</h3><p>Use <b>📲 Enviar resumen</b> en el Dashboard o el botón 📲 en cada orden.</p>
+  <label>Número predeterminado (con código país, ej. 16095551234)<input id="w_tel" value="${esc(w.tel)}"></label>
+  <label>Contactos (uno por línea: Nombre, Número)<textarea id="w_con" rows="4" placeholder="Juan Pérez, 16095551111">${esc(w.contactos||'')}</textarea></label>
+  <h3>2. Alerta automática diaria (opcional – CallMeBot)</h3>
+  <p style="font-size:13px">Una vez al día, al abrir ManteniPro, se envía el resumen al número predeterminado. Para obtener la API key: agregue <b>+34 644 51 95 23</b> a sus contactos y envíele por WhatsApp: <code>I allow callmebot to send me messages</code>.</p>
+  <div class="grid"><label>API key CallMeBot<input id="w_key" value="${esc(w.apikey)}"></label>
+  <label>Alerta automática<select id="w_auto"><option value="0">Desactivada</option><option value="1" ${w.auto?'selected':''}>Activada</option></select></label></div>
+  <p style="font-size:12px">Último envío automático: ${w.ultimo||'nunca'}</p>
+  <div class="row"><button class="btn" onclick="guardaWA()">Guardar</button><button class="btn s" onclick="guardaWA();autoWA(true)">Enviar prueba automática</button><button class="btn v" onclick="waResumen()">Probar envío manual</button></div></div>`};
+function guardaWA(){const w=WA();w.tel=w_tel.value.replace(/\D/g,'');w.contactos=w_con.value.trim();w.apikey=w_key.value.trim();w.auto=w_auto.value==='1';audit('Configuró WhatsApp');toast('✔ Guardado')}
+function autoWA(forzar){const w=WA();
+  if(!w.tel||!w.apikey)return forzar&&alert('Falta número predeterminado o API key');
+  if(!forzar&&(!w.auto||w.ultimo===hoy()))return;
+  fetch('https://api.callmebot.com/whatsapp.php?phone='+w.tel+'&apikey='+encodeURIComponent(w.apikey)+'&text='+encodeURIComponent(msgResumen()),{mode:'no-cors'})
+   .then(()=>{w.ultimo=hoy();audit('Alerta automática WhatsApp enviada a '+w.tel);forzar&&alert('Enviado. Revise su WhatsApp.')})
+   .catch(()=>forzar&&alert('Sin conexión a internet'));
+}
+
+/* ===================== COMPARTIR ===================== */
+function txtOT(o){
+  if(o.estado==='Completada')return `✅ *${EMP()} – Reporte de Mantenimiento*\nOT ${o.num} | ${eqN(o.equipoId)}\n${o.descripcion} (${o.tipo}, ${o.crew})\nRealizado por: ${o.tecnico} el ${o.cierre} · ${o.horas} h\nResultado: ${o.resultado}\nRepuestos: ${o.repuestos||'-'}\nNotas: ${o.notas||'-'}`+((o.checklist||[]).length?'\n'+o.checklist.join('\n'):'');
+  return `🔧 *${EMP()} – Orden de Trabajo*\n${otTxt(o)}\nTipo: ${o.tipo} | Crew: ${o.crew}\nFavor completar y registrar en ManteniPro.`;
+}
+function compartirOT(id){const o=DB.ots.find(x=>x.id===id);compartir(txtOT(o),EMP()+' – '+o.num)}
+let SH_AS='';
+function compartir(txt,asunto){
+  SH_AS=asunto||EMP()+' – Mantenimiento';
+  modal_(`<h2>📤 Compartir mensaje</h2><textarea id="sh_txt" rows="9">${esc(txt)}</textarea>
+  <div class="row" style="margin-top:10px">${navigator.share?'<button class="btn" onclick="shNativo()">📱 Compartir…</button>':''}
+   <button class="btn v" onclick="shAbrir('wa')">📲 WhatsApp</button><button class="btn" style="background:#5b5fc7" onclick="shAbrir('teams')">💬 Teams</button>
+   <button class="btn" onclick="shAbrir('mail')">✉️ Correo</button><button class="btn" onclick="shAbrir('sms')">💭 SMS</button>
+   <button class="btn s" onclick="shCopiar()">📋 Copiar</button><button class="btn s" onclick="cerrar()">Cerrar</button></div>
+  <p id="sh_ok" style="font-size:12px;color:var(--verde)"></p>`);
+}
+function shAbrir(m){
+  const e=encodeURIComponent(sh_txt.value),a=encodeURIComponent(SH_AS);
+  const url={wa:'https://wa.me/?text='+e,teams:'https://teams.microsoft.com/share?msgText='+e,mail:'mailto:?subject='+a+'&body='+e,sms:'sms:?&body='+e}[m];
+  if(m==='mail'||m==='sms')location.href=url;else window.open(url,'_blank');
+  audit('Compartió mensaje por '+{wa:'WhatsApp',teams:'Teams',mail:'Correo',sms:'SMS'}[m]);
+}
+async function shNativo(){try{await navigator.share({title:SH_AS,text:sh_txt.value});audit('Compartió mensaje (menú del sistema)')}catch(e){}}
+async function shCopiar(){try{await navigator.clipboard.writeText(sh_txt.value)}catch(e){sh_txt.select();document.execCommand('copy')}sh_ok.textContent='✔ Copiado. Péguelo donde quiera (Ctrl+V).'}
+
+/* ===================== POP-UP VENCIDOS ===================== */
+const vencidas=()=>DB.ots.filter(o=>o.estado!=='Completada'&&diff(o.fin)<0).sort((a,b)=>(eqO(b.equipoId).prioridad||0)-(eqO(a.equipoId).prioridad||0)||a.fin.localeCompare(b.fin));
+function bellVenc(){if(!DB)return;const n=vencidas().length;bellV.style.display=n?'inline-block':'none';bellV.textContent='⚠️ '+n+' vencido'+(n===1?'':'s')}
+let POPF='';
+function popupVencidos(forzar){
+  bellVenc();
+  const l=vencidas();
+  if(!l.length){if(forzar)alert('✅ No hay mantenimientos vencidos.');return}
+  const firma=hoy()+'|'+l.map(o=>o.id).join(',');
+  if(!forzar&&localStorage.getItem('mp_popv')===firma)return;
+  const crit=l.filter(o=>eqO(o.equipoId).prioridad>=7).length;
+  modal_(`<h2 style="color:var(--rojo)">⚠️ Mantenimiento vencido</h2>
+   <p>Hay <b>${l.length}</b> mantenimiento${l.length===1?'':'s'} vencido${l.length===1?'':'s'}${crit?` · <span class="tag t-r">${crit} CRÍTICO${crit===1?'':'S'}</span>`:''}</p>
+   <div class="tw" style="max-height:45vh"><table><tr><th>OT</th><th>Equipo</th><th>Descripción</th><th>Límite</th><th>Atraso</th><th></th></tr>
+   ${l.map(o=>`<tr><td>${o.num}</td><td>${esc(eqN(o.equipoId))} ${eqO(o.equipoId).prioridad>=7?'<span class="tag t-r">CRÍTICO</span>':''}</td><td>${esc(o.descripcion)}</td><td>${o.fin}</td>
+   <td><span class="tag t-r">${-diff(o.fin)} día${-diff(o.fin)===1?'':'s'}</span></td><td><button class="btn sm v" onclick="cerrarOT('${o.id}')">Completar</button></td></tr>`).join('')}</table></div>
+   <label style="margin-top:10px"><input type="checkbox" id="pv_hoy" style="width:auto"> No volver a mostrar hoy (salvo que venza otro mantenimiento)</label>
+   <div class="row"><button class="btn" onclick="cerrarPopV();go('ots')">📋 Ver órdenes</button><button class="btn v" onclick="cerrarPopV();waResumen()">📲 Avisar por WhatsApp</button>
+   <button class="btn s" onclick="cerrarPopV();compartir(msgResumen(),'Mantenimiento vencido')">📤 Compartir</button><button class="btn s" onclick="cerrarPopV()">Cerrar</button></div>`);
+  const c=document.querySelector('#modal .card');c.classList.add('alerta-v');c.style.maxWidth='860px';POPF=firma;
+}
+function cerrarPopV(){if(document.getElementById('pv_hoy')&&pv_hoy.checked)localStorage.setItem('mp_popv',POPF);cerrar()}
+
+/* ===================== RESPALDO / EMPRESA ===================== */
+R.datos=()=>{main.innerHTML=`<div class="card"><h2>💾 Respaldo de datos</h2>
+  <p>Los datos se guardan automáticamente en la <b>nube</b> y se pueden abrir desde cualquier equipo con su correo y contraseña. Además, descargue un respaldo de vez en cuando.</p>
+  <div class="row"><button class="btn" onclick="bajar('mantenipro_respaldo_'+hoy()+'.json',JSON.stringify(DB,null,1),'application/json');audit('Exportó respaldo')">⬇ Descargar respaldo (JSON)</button>
+  <label class="btn s" style="margin:0">⬆ Restaurar respaldo<input type="file" accept=".json" style="display:none" onchange="importar(this)"></label>
+  <button class="btn r" onclick="borrarBD()">Reiniciar sistema</button></div></div>
+  <div class="card"><h2>🏷️ Empresa y logo</h2>
+  <div class="row" style="align-items:flex-start;gap:20px"><img src="${DB.logo||LOGO_FULL}" style="max-width:160px;max-height:170px;border:1px solid var(--borde);border-radius:8px;padding:6px;background:#fff">
+  <div style="flex:1;min-width:240px"><label>Nombre de la empresa<input id="cf_emp" value="${esc(EMP())}"></label>
+  <div class="row"><button class="btn" onclick="guardaEmpresa()">💾 Guardar nombre</button>
+  <label class="btn s" style="margin:0">🖼️ Cambiar logo<input type="file" accept="image/*" style="display:none" onchange="subirLogo(this)"></label>
+  ${DB.logo?'<button class="btn s" onclick="logoOriginal()">↺ Logo original</button>':''}</div>
+  <p style="font-size:12px;color:#666">PNG o JPG; se recomienda fondo transparente.</p></div></div></div>`};
+function importar(inp){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.equipos)throw 0;
+  if(!confirm('¿Reemplazar TODOS los datos de la nube por los del respaldo?'))return;
+  DB=normalizar(d);aplicarLogo();audit('Restauró respaldo');alert('Respaldo restaurado');go('dash')}catch(e){alert('Archivo inválido')}};r.readAsText(inp.files[0])}
+function borrarBD(){
+  if(!confirm('¿Borrar TODOS los datos (equipos, planes, órdenes e historial) de la nube y empezar de nuevo?\n\nDescargue un respaldo antes.'))return;
+  if(prompt('Escriba BORRAR para confirmar')!=='BORRAR')return;
+  const keep={empresa:DB.empresa,logo:DB.logo,perfil:DB.perfil,wa:DB.wa};DB=Object.assign(seed(),keep);audit('Reinició el sistema');go('dash');
+}
+function guardaEmpresa(){const v=cf_emp.value.trim();if(!v)return alert('Escriba el nombre');DB.empresa=v;aplicarLogo();audit('Cambió nombre de empresa a '+v);toast('✔ Nombre guardado');R.datos()}
+function subirLogo(inp){const f=inp.files[0];if(!f)return;if(!/^image\//.test(f.type))return alert('Seleccione una imagen');
+  const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{
+    const k=Math.min(1,300/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);DB.logo=c.toDataURL('image/png');aplicarLogo();audit('Cambió el logo');toast('✔ Logo guardado');R.datos()};
+    img.onerror=()=>alert('No se pudo leer la imagen');img.src=r.result};r.readAsDataURL(f)}
+function logoOriginal(){delete DB.logo;aplicarLogo();audit('Restauró logo original');R.datos()}
+
+/* ===================== MI CUENTA ===================== */
+function miCuenta(){
+  modal_(`<h2>👤 Mi cuenta</h2>
+  <label>Correo<input value="${esc(SES.email)}" disabled></label>
+  <label>Nombre (aparece en órdenes y auditoría)<input id="mc_n" value="${esc(DB.perfil.nombre||'')}" placeholder="${esc(U.nombre)}"></label>
+  <div class="row"><button class="btn" onclick="guardaNombre()">💾 Guardar nombre</button></div>
+  <div class="card" style="background:#f8fafc"><b>🔑 Cambiar contraseña</b>
+  <label>Contraseña actual<input type="password" id="m_a" autocomplete="current-password"></label>
+  <div class="grid"><label>Nueva contraseña<input type="password" id="m_p" autocomplete="new-password">${ojo('m_p')}</label><label>Confirmar nueva<input type="password" id="m_p2" autocomplete="new-password"></label></div>
+  <p style="font-size:12px;color:#666">Mínimo 8 caracteres, con letras y números.</p>
+  <button class="btn v" id="m_btn" onclick="guardaMiPass()">💾 Cambiar contraseña</button></div>
+  <div class="row"><button class="btn s" onclick="cerrar()">Cerrar</button></div>`);
+}
+function guardaNombre(){DB.perfil.nombre=mc_n.value.trim();U.nombre=DB.perfil.nombre||SES.email.split('@')[0];who.textContent=U.nombre;audit('Cambió su nombre a '+U.nombre);toast('✔ Nombre guardado')}
+async function guardaMiPass(){
+  const e=reglaPass(m_p.value,m_p2.value);if(e)return alert(e);
+  if(m_p.value===m_a.value)return alert('La nueva contraseña debe ser diferente a la actual.');
+  m_btn.disabled=true;
+  try{
+    try{guardarSes(await sb('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:SES.email,password:m_a.value})},false))}
+    catch(x){if(x.status===400)throw new Error('La contraseña actual no es correcta.');throw x}
+    await sb('/auth/v1/user',{method:'PUT',body:JSON.stringify({password:m_p.value})});
+    audit('Cambió su contraseña');cerrar();toast('✔ Contraseña cambiada');
+  }catch(x){alert(x.status?'No se pudo cambiar: '+x.message:x.message||'Sin conexión con la nube.')}
+  if(document.getElementById('m_btn'))m_btn.disabled=false;
+}
+
+/* ===================== ARRANQUE ===================== */
+(async()=>{
+  aplicarLogo();
+  const c=CFG();
+  if(!c.url||!c.key){mostrarLogin('cfg');return}
+  mostrarLogin('login');
+  if(SES){
+    lu.value=SES.email||'';
+    try{await abrirDatos();entrar()}
+    catch(e){if(e.status===400||e.status===401){SES=null;localStorage.removeItem('mp_ses');loginMsg.textContent='La sesión expiró. Inicie sesión de nuevo.'}
+      else loginMsg.textContent='No hay conexión con la nube. Revise internet.'}
+  }
+})();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>

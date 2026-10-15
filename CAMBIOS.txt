@@ -1,20 +1,11 @@
-ManteniPro v1.8.0 - Ferreteria Quilvio
-- Equipos, Planes PM, Ordenes de Trabajo, Historial (CSV)
-- OT de PM automaticas (7 dias antes), OT correctivas
-- Cierre de OT con checklist
-- Usuarios y roles (Tecnico / Supervisor / Admin), Auditoria
-- Alertas por WhatsApp (manual y automatica diaria con CallMeBot)
-- Boton Compartir: WhatsApp, Teams, Correo, SMS, Copiar, menu del sistema
-- Respaldo / Restaurar (JSON), PWA para iPhone, instalador Windows
-- Status de equipo: Bajo / Medio / Alto (filtro, dashboard, alertas)
-- Status de equipo obligatorio: debe seleccionarse al crear o editar
-- Nuevo equipo: Medidor de Nivel de Liquido de Baterias (BATLVL1) con PM semanal
-- Base de Datos: registros de mantenimiento con filtros, registro manual, costo de repuestos y exportacion a Excel (.xlsx)
-- Base de datos interna (IndexedDB) con tablas, migracion automatica, panel de tablas e integridad
-- Boton para borrar ordenes de trabajo (con motivo, confirmacion y auditoria)
-- Planes PM: agregar, editar, duplicar y eliminar; frecuencia personalizada; filtros; + Plan PM desde Equipos
-- Se elimino el requisito de Lockout/Tagout
-- Pop-up de alerta cuando hay mantenimientos vencidos + indicador en la barra superior
-- El pop-up de vencidos parpadea cada 2 segundos
-- Usuarios y contrasenas: confirmar, mostrar, reglas, cifrado con sal, activar/desactivar, restablecer, Mi contrasena, cambio obligatorio al primer ingreso
-- Logo y nombre de Ferreteria Quilvio (inicio de sesion, barra superior, icono de app, mensajes); el Admin puede cambiar logo y nombre
+ManteniPro v2.1.0 - Ferreteria Quilvio
+- NUEVO: un solo usuario (correo y contrasena) y base de datos en la nube (Supabase)
+- Los mismos datos en PC, iPhone y web; sincronizacion automatica
+- Funciona sin internet y sube los cambios al reconectar
+- Combina cambios hechos en dos equipos al mismo tiempo
+- Mi cuenta: nombre y cambio de contrasena
+- Se quitaron: modulo de varios usuarios/roles y servidor local
+- Se mantienen: equipos (status obligatorio), planes PM, ordenes, historial,
+  base de datos y Excel, WhatsApp, Compartir, pop-up de vencidos, logo y respaldos
+- v2.1: equipos y ordenes de trabajo tambien se guardan como TABLAS en la nube
+  (Supabase: tablas 'equipos' y 'ordenes'), visibles en Table Editor y exportables a CSV

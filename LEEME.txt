@@ -1,15 +1,48 @@
-MANTENIPRO - Mantenimiento de Equipos
-=====================================
-WINDOWS
- 1. Descomprima el ZIP (clic derecho > Extraer todo).
- 2. Doble clic en INSTALAR.bat
- 3. Abra "ManteniPro" desde el Escritorio. Usuario: admin / admin123 (el sistema pedira cambiarla)
+MANTENIPRO v2.1 - Ferreteria Quilvio
+Un solo usuario - Base de datos en la nube (Supabase, plan gratis)
+=================================================================
 
-WEB / IPHONE (GitHub Pages, gratis)
- 1. Suba TODO el contenido de esta carpeta a la raiz del repositorio.
- 2. Settings > Pages > Branch: main > Save
- 3. iPhone: abra el enlace en Safari > Compartir > Agregar a inicio
+PASO 1 - Crear la base de datos en la nube (una sola vez, ~10 min)
+ 1. Entre a https://supabase.com y cree una cuenta (gratis).
+ 2. "New project": nombre ManteniPro, escriba una contrasena de base de datos
+    (guardela) y la region mas cercana (East US). Espere 1-2 minutos.
+ 3. Menu izquierdo > SQL Editor > New query. Abra el archivo
+    supabase_setup.sql de esta carpeta, copie TODO, peguelo y pulse Run.
+    Debe decir "Success".
+ 4. Authentication > Users > "Add user" > "Create new user":
+    escriba SU correo y una contrasena (minimo 8, letras y numeros)
+    y marque "Auto Confirm User". Este es el UNICO usuario.
+ 5. Authentication > Sign In / Providers (o Settings): DESACTIVE
+    "Allow new users to sign up" para que nadie mas pueda crear cuenta.
+ 6. Project Settings > API (o "Data API" / "API Keys"): copie
+      - Project URL        (ej. https://abcdxyz.supabase.co)
+      - anon / publishable key  (la clave PUBLICA, NO la "service_role")
+
+PASO 2 - Abrir el programa
+ - Web/iPhone: suba index.html, manifest.json, sw.js y la carpeta icons
+   a GitHub (raiz del repositorio) y abra https://SU-USUARIO.github.io/Mantenimiento/
+ - PC: doble clic en INSTALAR.bat (o abra index.html).
+ La primera vez pide: URL del proyecto y clave publica > Conectar.
+ Luego entre con su correo y contrasena.
+ La primera vez puede subir los datos que ya tenia en ese equipo.
+
+OPCIONAL: para no escribir la URL y la clave en cada equipo, abra
+index.html con el Bloc de notas, busque NUBE_URL='' y NUBE_KEY=''
+y pegue los valores entre las comillas.
 
 IMPORTANTE
- - Los datos se guardan en la base de datos interna del programa (IndexedDB) en cada equipo.
- - Use Respaldo > Descargar respaldo con frecuencia.
+ - Nunca use ni comparta la clave "service_role".
+ - Los datos quedan en la nube y en cualquier equipo donde entre con su cuenta.
+ - Si no hay internet, el programa sigue funcionando y sube los cambios al reconectar.
+ - Descargue de vez en cuando un respaldo: Respaldo > Descargar respaldo.
+ - El proyecto gratis de Supabase se pausa si pasa 7 dias sin uso; se reactiva
+   desde supabase.com (los datos no se pierden).
+
+TABLAS DE EQUIPOS Y ORDENES (v2.1)
+ - supabase_setup.sql ahora tambien crea las tablas "equipos" y "ordenes".
+   Si ya tenia la v2.0: vuelva a ejecutar supabase_setup.sql completo (no borra datos).
+ - Cada equipo y cada orden de trabajo queda como una fila en esas tablas.
+   Verlas: supabase.com > su proyecto > Table Editor > equipos / ordenes.
+   Exportar: en el Table Editor, boton "Export" > CSV.
+ - En ManteniPro: Base de Datos > Tablas en la nube muestra cuantas filas hay
+   y el boton "Subir todo a las tablas" las vuelve a llenar completas.
