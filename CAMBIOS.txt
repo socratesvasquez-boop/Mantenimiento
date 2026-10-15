@@ -1,4 +1,4 @@
-ManteniPro v1.5.0
+ManteniPro v1.5.1
 - Equipos, Planes PM, Ordenes de Trabajo, Historial (CSV)
 - OT de PM automaticas (7 dias antes), OT correctivas
 - Cierre con Lockout/Tagout y checklist
@@ -11,3 +11,4 @@ ManteniPro v1.5.0
 - Nuevo equipo: Medidor de Nivel de Liquido de Baterias (BATLVL1) con PM semanal
 - Base de Datos: registros de mantenimiento con filtros, registro manual, costo de repuestos y exportacion a Excel (.xlsx)
 - Base de datos interna (IndexedDB) con tablas, migracion automatica, panel de tablas e integridad
+- Boton para borrar ordenes de trabajo (con motivo, confirmacion y auditoria)
