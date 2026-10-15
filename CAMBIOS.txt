@@ -1,0 +1,13 @@
+ManteniPro v1.5.0
+- Equipos, Planes PM, Ordenes de Trabajo, Historial (CSV)
+- OT de PM automaticas (7 dias antes), OT correctivas
+- Cierre con Lockout/Tagout y checklist
+- Usuarios y roles (Tecnico / Supervisor / Admin), Auditoria
+- Alertas por WhatsApp (manual y automatica diaria con CallMeBot)
+- Boton Compartir: WhatsApp, Teams, Correo, SMS, Copiar, menu del sistema
+- Respaldo / Restaurar (JSON), PWA para iPhone, instalador Windows
+- Status de equipo: Bajo / Medio / Alto (filtro, dashboard, alertas)
+- Status de equipo obligatorio: debe seleccionarse al crear o editar
+- Nuevo equipo: Medidor de Nivel de Liquido de Baterias (BATLVL1) con PM semanal
+- Base de Datos: registros de mantenimiento con filtros, registro manual, costo de repuestos y exportacion a Excel (.xlsx)
+- Base de datos interna (IndexedDB) con tablas, migracion automatica, panel de tablas e integridad

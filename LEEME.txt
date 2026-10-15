@@ -1,0 +1,15 @@
+MANTENIPRO - Mantenimiento de Equipos
+=====================================
+WINDOWS
+ 1. Descomprima el ZIP (clic derecho > Extraer todo).
+ 2. Doble clic en INSTALAR.bat
+ 3. Abra "ManteniPro" desde el Escritorio. Usuario: admin / admin123
+
+WEB / IPHONE (GitHub Pages, gratis)
+ 1. Suba TODO el contenido de esta carpeta a la raiz del repositorio.
+ 2. Settings > Pages > Branch: main > Save
+ 3. iPhone: abra el enlace en Safari > Compartir > Agregar a inicio
+
+IMPORTANTE
+ - Los datos se guardan en la base de datos interna del programa (IndexedDB) en cada equipo.
+ - Use Respaldo > Descargar respaldo con frecuencia.

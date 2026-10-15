@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#0b3d91">
+<title>ManteniPro v1.5.0 - Mantenimiento de Equipos</title>
+<style>
+:root{--azul:#0b3d91;--azul2:#1565c0;--rojo:#c62828;--ama:#f9a825;--verde:#2e7d32;--gris:#f3f5f9;--borde:#d5dbe5}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--gris);color:#1d2433}
+header{background:var(--azul);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;flex:1}header span{font-size:13px;opacity:.9}
+nav{display:flex;gap:4px;flex-wrap:wrap;background:#fff;padding:6px 10px;border-bottom:1px solid var(--borde)}
+nav button{background:none;border:none;padding:8px 12px;cursor:pointer;border-radius:6px;font-size:14px}
+nav button.act{background:var(--azul2);color:#fff}
+main{padding:16px;max-width:1300px;margin:auto}
+.card{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:14px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:#fff;border-radius:10px;padding:14px;border-left:6px solid var(--azul2)}
+.kpi b{font-size:28px;display:block}.kpi.r{border-color:var(--rojo)}.kpi.a{border-color:var(--ama)}.kpi.v{border-color:var(--verde)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:7px;border-bottom:1px solid var(--borde);text-align:left;vertical-align:top}
+th{background:#e8edf6;position:sticky;top:0}.tw{overflow:auto;max-height:520px}
+.tag{padding:2px 8px;border-radius:10px;font-size:12px;color:#fff;white-space:nowrap}
+.t-r{background:var(--rojo)}.t-a{background:var(--ama);color:#000}.t-v{background:var(--verde)}.t-g{background:#78849e}.t-b{background:var(--azul2)}.st-Bajo{background:var(--verde)}.st-Medio{background:var(--ama);color:#000}.st-Alto{background:var(--rojo)}
+input,select,textarea{padding:7px;border:1px solid var(--borde);border-radius:6px;font-size:14px;width:100%}
+label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.btn{background:var(--azul2);color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:14px}
+.btn.s{background:#fff;color:var(--azul2);border:1px solid var(--azul2)}.btn.r{background:var(--rojo)}.btn.v{background:var(--verde)}.btn.sm{padding:4px 8px;font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+#login{max-width:360px;margin:80px auto}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:9;padding:10px}
+.modal .card{width:100%;max-width:620px;max-height:92vh;overflow:auto}
+.hide{display:none}h2{margin:4px 0 12px;font-size:18px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="card">
+  <h2>🔧 ManteniPro</h2>
+  <label>Usuario<input id="lu" autocomplete="username"></label>
+  <label>Contraseña<input id="lp" type="password" autocomplete="current-password"></label>
+  <button class="btn" onclick="login()">Entrar</button>
+  <p style="font-size:12px;color:#777">Primer uso: <b>admin</b> / <b>admin123</b> (cámbiela en Usuarios)</p>
+</div>
+
+<div id="app" class="hide">
+<header><h1>🔧 ManteniPro – Mantenimiento de Equipos <small style="font-size:11px;opacity:.7">v1.5.0</small></h1><span id="who"></span><button class="btn s sm" onclick="logout()">Salir</button></header>
+<nav id="nav"></nav>
+<main id="main"></main>
+</div>
+
+<div class="modal" id="modal"><div class="card" id="mbody"></div></div>
+
+<script>
+/* ===================== DATOS ===================== */
+const K='mantenipro_v1';
+let DB=null;
+const hoy=()=>new Date().toISOString().slice(0,10);
+const addDias=(f,d)=>{const x=new Date(f+'T00:00:00');x.setDate(x.getDate()+d);return x.toISOString().slice(0,10)};
+const diff=f=>Math.round((new Date(f+'T00:00:00')-new Date(hoy()+'T00:00:00'))/864e5);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+/* ===== BASE DE DATOS INTERNA (IndexedDB) ===== */
+const DBNAME='ManteniProDB',TABLAS=['equipos','planes','ots','usuarios','log','config'];
+let IDB=null,ULTIMO_GUARDADO='';
+function idbOpen(){return new Promise((res,rej)=>{const r=indexedDB.open(DBNAME,1);
+  r.onupgradeneeded=()=>{const d=r.result;
+    ['equipos','planes','ots','usuarios'].forEach(t=>{if(!d.objectStoreNames.contains(t))d.createObjectStore(t,{keyPath:'id'})});
+    if(!d.objectStoreNames.contains('log'))d.createObjectStore('log');
+    if(!d.objectStoreNames.contains('config'))d.createObjectStore('config',{keyPath:'k'});
+    d.objectStoreNames.contains('ots')&&r.transaction.objectStore('ots').createIndex('equipoId','equipoId');};
+  r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);r.onblocked=()=>rej('bloqueada')})}
+async function idbLoad(){
+  IDB=await idbOpen();const tx=IDB.transaction(TABLAS,'readonly');
+  const g=t=>new Promise((r,j)=>{const q=tx.objectStore(t).getAll();q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)});
+  const [equipos,planes,ots,usuarios,log,config]=await Promise.all(TABLAS.map(g));
+  if(!usuarios.length) return null;
+  const cf=Object.fromEntries(config.map(x=>[x.k,x.v]));ULTIMO_GUARDADO=cf.guardado||'';
+  return {equipos,planes,ots,usuarios,log,seq:cf.seq||1000,wa:cf.wa||undefined};
+}
+function save(){
+  if(!IDB){try{localStorage.setItem(K,JSON.stringify(DB))}catch(e){alert('No se pudo guardar: '+e)}return}
+  const tx=IDB.transaction(TABLAS,'readwrite');
+  ['equipos','planes','ots','usuarios'].forEach(t=>{const st=tx.objectStore(t);st.clear();DB[t].forEach(x=>st.put(x))});
+  const l=tx.objectStore('log');l.clear();DB.log.forEach((x,i)=>l.put(x,i));
+  ULTIMO_GUARDADO=new Date().toLocaleString();
+  const c=tx.objectStore('config');c.put({k:'seq',v:DB.seq});c.put({k:'wa',v:DB.wa||null});c.put({k:'guardado',v:ULTIMO_GUARDADO});
+  tx.onerror=()=>alert('Error al guardar en la base de datos: '+tx.error);
+}
+function borrarBD(){
+  if(!confirm('¿Borrar TODA la base de datos y reiniciar? Haga un respaldo antes.'))return;
+  if(IDB)IDB.close();const r=indexedDB.deleteDatabase(DBNAME);
+  const fin=()=>{localStorage.removeItem(K);sessionStorage.clear();location.reload()};r.onsuccess=fin;r.onerror=fin;r.onblocked=fin;
+}
+const listo=(async()=>{
+  try{DB=await idbLoad()}catch(e){IDB=null;console.warn('IndexedDB no disponible, se usa localStorage',e)}
+  let migrado=false;
+  if(!DB){const old=localStorage.getItem(K);if(old){DB=JSON.parse(old);migrado=true}}
+  if(!DB){await seed()}
+  addBaterias();DB.equipos.forEach(e=>{if(!e.status)e.status='Bajo'});
+  if(migrado&&IDB){DB.log.unshift({f:new Date().toLocaleString(),u:'Sistema',a:'Datos migrados a la base de datos interna (IndexedDB)'});
+    localStorage.setItem(K+'_respaldo_migracion',localStorage.getItem(K));localStorage.removeItem(K)}
+  save();
+  try{navigator.storage&&navigator.storage.persist&&await navigator.storage.persist()}catch(e){}
+})();
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function hash(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+
+async function seed(){
+  const eq=[['CAPPER1','Capper 1','Capper','FLR – Línea Llenado',2],['CAPPER2','Capper 2','Capper','FLR – Línea Llenado',2],
+   ['SPINSCAN1','Spin Scan 1','Spin Scan','FLR – Inspección',2],['WS9','Wrap Seal 9','Wrap Seal','FLR – Empaque',7],
+   ['BOTTLEHOPPER1','Bottle Hopper 1 (120cc)','Bottle Hopper','FLR – Alimentación',7],['ETCHER1','Etcher Station 1','Etcher','FLR – Etiquetado',2],
+   ['INSPECT1','Inspect Station 1','Cámara Cognex','FLR – Inspección',2],['MAILSORTER','Mail Sorter','Sorter','FLR – Envíos',7],
+   ['ROBOT1','Robot Omron Viper 650','Robot','FLR – Celda 1',7],['PCM1','Pallet Conveyor Motors HVF 7-9','Conveyor','FLR – HVF',7]];
+  DB={equipos:[],planes:[],ots:[],usuarios:[],log:[],seq:1000};
+  eq.forEach(([cod,n,t,u,p])=>DB.equipos.push({id:uid(),codigo:cod,nombre:n,tipo:t,ubicacion:u,prioridad:p,marca:'',serie:'',estado:'Operativo',status:'Bajo'}));
+  const pl=[[0,'Capper Clean',14,'EMT','Limpieza general\nRevisar cabezales\nVerificar torque'],[1,'Capper Clean',14,'EMT','Limpieza general\nRevisar cabezales\nVerificar torque'],
+   [2,'Spin Scan PM',14,'EMT','Limpiar lentes\nVerificar lectura\nRevisar rodillos'],[3,'Wrap Seal Quarterly – CRITICAL',90,'EMT','Inspeccionar fold tool\nRevisar vacío\nLimpiar sellador'],
+   [4,'Bottle Hopper PM – CRITICAL',14,'EMT','Revisar alimentación\nLimpiar tolva\nVerificar sensores'],[5,'Etcher Maintenance',14,'EMT','Limpiar óptica\nRevisar extracción'],
+   [6,'Inspección Cámara Cognex',30,'CONTROL','Limpiar lente\nVerificar iluminación\nRespaldo de job'],[7,'End of Shift Inspection',1,'CONTROL','Inspección visual\nRevisar atascos'],
+   [8,'Robot PM / Calibración',180,'CONTROL','Respaldo de programa\nVerificar calibración\nRevisar cables y grasa'],[9,'Motor/LTU/Belt Monthly – CRITICAL',30,'EMT','Revisar motores\nTensión de bandas\nRuido/vibración']];
+  pl.forEach(([i,d,f,c,t])=>DB.planes.push({id:uid(),equipoId:DB.equipos[i].id,descripcion:d,frecuencia:f,crew:c,tareas:t,ultima:addDias(hoy(),-f+((i%4)-1)*3),activo:true}));
+  DB.usuarios.push({id:uid(),usuario:'admin',nombre:'Administrador',rol:'Admin',pass:await hash('admin123')});
+  save();
+}
+
+/* ===================== SESIÓN ===================== */
+let U=null;
+async function login(){
+  await listo;
+  const u=DB.usuarios.find(x=>x.usuario===lu.value.trim());
+  if(!u||u.pass!==await hash(lp.value)) return alert('Usuario o contraseña incorrectos');
+  U=u;sessionStorage.setItem('mp_u',u.id);audit('Inicio de sesión');start();
+}
+function logout(){sessionStorage.removeItem('mp_u');location.reload()}
+function audit(a){DB.log.unshift({f:new Date().toLocaleString(),u:U?U.nombre:'-',a});DB.log=DB.log.slice(0,2000);save()}
+const puede=r=>({Admin:3,Supervisor:2,'Técnico':1}[U.rol]>=r);
+
+/* ===================== NAVEGACIÓN ===================== */
+const VISTAS=[['dash','📊 Dashboard',1],['equipos','🏭 Equipos',1],['planes','🗓️ Planes PM',1],['ots','📋 Órdenes de Trabajo',1],['hist','📚 Historial',1],['bd','🗄️ Base de Datos',1],['usuarios','👥 Usuarios',3],['whats','📲 WhatsApp',2],['datos','💾 Respaldo',2],['audit','🔒 Auditoría',3]];
+let vista='dash';
+function start(){
+  document.getElementById('login').classList.add('hide');app.classList.remove('hide');
+  who.textContent=U.nombre+' ('+U.rol+')';generarOTs();autoWA(false);go('dash');
+}
+function go(v){vista=v;nav.innerHTML=VISTAS.filter(x=>puede(x[2])).map(x=>`<button class="${x[0]===v?'act':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('');R[v]()}
+const eqN=id=>(DB.equipos.find(e=>e.id===id)||{}).nombre||'¿?';
+const eqO=id=>DB.equipos.find(e=>e.id===id)||{};
+const prox=p=>addDias(p.ultima,p.frecuencia);
+function estadoTag(d){return d<0?`<span class="tag t-r">Vencido ${-d}d</span>`:d<=7?`<span class="tag t-a">En ${d}d</span>`:`<span class="tag t-v">En ${d}d</span>`}
+const STATUS=['Bajo','Medio','Alto'];
+const stTag=s=>`<span class="tag st-${s||'Bajo'}">${s==='Alto'?'▲ ':s==='Medio'?'■ ':'▼ '}${s||'Bajo'}</span>`;
+const prTag=p=>p>=7?'<span class="tag t-r">7 CRÍTICO</span>':'<span class="tag t-g">2 Normal</span>';
+
+/* Genera OT automáticamente cuando un PM está a 7 días o menos */
+function generarOTs(){
+  let n=0;
+  DB.planes.filter(p=>p.activo).forEach(p=>{
+    if(diff(prox(p))<=7 && !DB.ots.some(o=>o.planId===p.id&&o.estado!=='Completada')){
+      DB.ots.push({id:uid(),num:'F'+(++DB.seq),planId:p.id,equipoId:p.equipoId,tipo:'PM',descripcion:p.descripcion,crew:p.crew,
+        inicio:addDias(prox(p),-7),fin:prox(p),estado:'Abierta',asignado:'',creada:new Date().toLocaleString()});n++}
+  });
+  if(n){audit(`Generadas ${n} OT de PM automáticamente`);}
+}
+
+/* ===================== VISTAS ===================== */
+const R={};
+R.dash=()=>{
+  const ab=DB.ots.filter(o=>o.estado!=='Completada');
+  const venc=ab.filter(o=>diff(o.fin)<0), sem=ab.filter(o=>diff(o.fin)>=0&&diff(o.fin)<=7);
+  const crit=ab.filter(o=>eqO(o.equipoId).prioridad>=7);
+  const mes=DB.ots.filter(o=>o.estado==='Completada'&&o.cierre&&o.cierre.slice(0,7)===hoy().slice(0,7));
+  const fs=DB.equipos.filter(e=>e.estado!=='Operativo');
+  main.innerHTML=`<div class="kpis">
+   <div class="kpi r">Vencidas<b>${venc.length}</b></div><div class="kpi a">Vencen ≤7 días<b>${sem.length}</b></div>
+   <div class="kpi r">Críticas abiertas<b>${crit.length}</b></div><div class="kpi v">Completadas este mes<b>${mes.length}</b></div>
+   <div class="kpi">Equipos<b>${DB.equipos.length}</b></div><div class="kpi a">Equipos fuera de servicio<b>${fs.length}</b></div>
+   <div class="kpi r" style="cursor:pointer" onclick="go('equipos');fst.value='Alto';R.equipos2()">Status ALTO<b>${DB.equipos.filter(e=>e.status==='Alto').length}</b></div>
+   <div class="kpi a" style="cursor:pointer" onclick="go('equipos');fst.value='Medio';R.equipos2()">Status MEDIO<b>${DB.equipos.filter(e=>e.status==='Medio').length}</b></div>
+   <div class="kpi v" style="cursor:pointer" onclick="go('equipos');fst.value='Bajo';R.equipos2()">Status BAJO<b>${DB.equipos.filter(e=>(e.status||'Bajo')==='Bajo').length}</b></div></div>
+   <div class="card"><div class="row"><h2 style="flex:1">⏰ Recordatorios – PM pendientes (ordenados por fecha límite)</h2><button class="btn v" onclick="waResumen()">📲 Enviar resumen por WhatsApp</button><button class="btn" onclick="compartir(msgResumen(),'Alerta de Mantenimiento')">📤 Compartir</button></div>${tablaOT(ab.sort((a,b)=>a.fin.localeCompare(b.fin)))}</div>`;
+};
+function tablaOT(l){
+  if(!l.length) return '<p>Sin órdenes.</p>';
+  return `<div class="tw"><table><tr><th>OT</th><th>Equipo</th><th>Descripción</th><th>Tipo</th><th>Crew</th><th>Prioridad</th><th>Status</th><th>Inicio</th><th>Límite</th><th>Estado</th><th>Asignado</th><th></th></tr>
+  ${l.map(o=>`<tr><td>${o.num}</td><td>${esc(eqN(o.equipoId))}</td><td>${esc(o.descripcion)}</td><td>${o.tipo}</td><td>${o.crew}</td><td>${prTag(eqO(o.equipoId).prioridad)}</td><td>${stTag(eqO(o.equipoId).status)}</td>
+  <td>${o.inicio}</td><td>${o.fin}</td><td>${o.estado==='Completada'?'<span class="tag t-v">Completada</span>':estadoTag(diff(o.fin))+' <span class="tag t-b">'+o.estado+'</span>'}</td>
+  <td>${esc(o.asignado)}</td><td>${o.estado!=='Completada'?`<button class="btn sm v" onclick="cerrarOT('${o.id}')">Completar</button> <button class="btn sm s" title="WhatsApp" onclick="waOT('${o.id}')">📲</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button>`:`<button class="btn sm s" onclick="verOT('${o.id}')">Ver</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button>`}</td></tr>`).join('')}</table></div>`;
+}
+
+R.equipos=()=>{
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Equipos</h2><select id="fst" style="max-width:150px" onchange="R.equipos2()"><option value="">Todos los status</option>${STATUS.map(s=>`<option>${s}</option>`).join('')}</select><input id="fq" placeholder="Buscar..." style="max-width:220px" oninput="R.equipos2()">
+  ${puede(2)?'<button class="btn" onclick="editEq()">+ Nuevo equipo</button>':''}</div><div id="tq"></div></div>`;R.equipos2();
+};
+R.equipos2=()=>{
+  const q=(fq.value||'').toLowerCase();
+  const fs=fst.value;const l=DB.equipos.filter(e=>JSON.stringify(e).toLowerCase().includes(q)&&(!fs||e.status===fs)).sort((a,b)=>STATUS.indexOf(b.status)-STATUS.indexOf(a.status));
+  tq.innerHTML=`<div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Ubicación</th><th>Prioridad</th><th>Status</th><th>Estado</th><th>Próximo PM</th><th></th></tr>
+  ${l.map(e=>{const ps=DB.planes.filter(p=>p.equipoId===e.id&&p.activo).map(prox).sort();return `<tr><td>${esc(e.codigo)}</td><td>${esc(e.nombre)}</td><td>${esc(e.tipo)}</td><td>${esc(e.ubicacion)}</td>
+  <td>${prTag(e.prioridad)}</td><td>${puede(1)?`<select class="stsel" style="width:auto;padding:3px" onchange="setStatus('${e.id}',this.value)">${STATUS.map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select>`:''} ${stTag(e.status)}</td><td>${esc(e.estado)}</td><td>${ps[0]?ps[0]+' '+estadoTag(diff(ps[0])):'-'}</td>
+  <td><button class="btn sm s" onclick="histEq('${e.id}')">Historial</button> <button class="btn sm s" onclick="nuevaCorr('${e.id}')">Falla/OT</button>
+  ${puede(2)?`<button class="btn sm" onclick="editEq('${e.id}')">Editar</button>`:''}</td></tr>`}).join('')}</table></div>`;
+};
+function editEq(id){
+  const e=DB.equipos.find(x=>x.id===id)||{codigo:'',nombre:'',tipo:'',ubicacion:'',prioridad:2,marca:'',serie:'',estado:'Operativo',status:''};
+  modal_(`<h2>${id?'Editar':'Nuevo'} equipo</h2><div class="grid">
+  ${['codigo','nombre','tipo','ubicacion','marca','serie'].map(k=>`<label>${k[0].toUpperCase()+k.slice(1)}<input id="e_${k}" value="${esc(e[k])}"></label>`).join('')}
+  <label>Prioridad<select id="e_prioridad"><option value="2">2 – Normal</option><option value="7" ${e.prioridad>=7?'selected':''}>7 – Crítico</option></select></label>
+  <label>Status (condición) <b style="color:var(--rojo)">*</b><select id="e_status" required><option value="" ${e.status?'':'selected'} disabled>-- Seleccione status --</option>${STATUS.map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select></label>
+  <label>Estado<select id="e_estado">${['Operativo','En mantenimiento','Fuera de servicio'].map(s=>`<option ${s===e.estado?'selected':''}>${s}</option>`).join('')}</select></label></div>
+  <div class="row"><button class="btn" onclick="guardaEq('${id||''}')">Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button>
+  ${id&&puede(3)?`<button class="btn r" onclick="borraEq('${id}')">Eliminar</button>`:''}</div>`);
+}
+function guardaEq(id){
+  const o={};['codigo','nombre','tipo','ubicacion','marca','serie','estado'].forEach(k=>o[k]=document.getElementById('e_'+k).value.trim());o.prioridad=+e_prioridad.value;o.status=e_status.value;
+  if(!o.codigo||!o.nombre) return alert('Código y nombre son obligatorios');
+  if(!o.status){e_status.style.border='2px solid var(--rojo)';e_status.focus();return alert('Debe seleccionar el Status del equipo: Bajo, Medio o Alto.')}
+  if(id){const ant=DB.equipos.find(x=>x.id===id);if(ant.status!==o.status)audit(`Cambió status de ${o.codigo}: ${ant.status||'Bajo'} → ${o.status}`);Object.assign(ant,o);audit('Editó equipo '+o.codigo)}else{DB.equipos.push({id:uid(),...o});audit('Creó equipo '+o.codigo)}
+  save();cerrar();R.equipos();
+}
+function setStatus(id,v){const e=DB.equipos.find(x=>x.id===id);audit(`Cambió status de ${e.codigo}: ${e.status||'Bajo'} → ${v}`);e.status=v;save();R.equipos2()}
+function borraEq(id){if(!confirm('¿Eliminar equipo y sus planes?'))return;const e=DB.equipos.find(x=>x.id===id);
+  DB.equipos=DB.equipos.filter(x=>x.id!==id);DB.planes=DB.planes.filter(p=>p.equipoId!==id);audit('Eliminó equipo '+e.codigo);save();cerrar();R.equipos()}
+
+R.planes=()=>{
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Planes de Mantenimiento Preventivo</h2>${puede(2)?'<button class="btn" onclick="editPlan()">+ Nuevo plan PM</button>':''}</div>
+  <div class="tw"><table><tr><th>Equipo</th><th>Descripción</th><th>Frecuencia</th><th>Crew</th><th>Último</th><th>Próximo</th><th>Estado</th><th></th></tr>
+  ${DB.planes.slice().sort((a,b)=>prox(a).localeCompare(prox(b))).map(p=>`<tr><td>${esc(eqN(p.equipoId))}</td><td>${esc(p.descripcion)}</td><td>${frecTxt(p.frecuencia)}</td><td>${p.crew}</td>
+  <td>${p.ultima}</td><td>${prox(p)}</td><td>${p.activo?estadoTag(diff(prox(p))):'<span class="tag t-g">Inactivo</span>'}</td>
+  <td>${puede(2)?`<button class="btn sm" onclick="editPlan('${p.id}')">Editar</button>`:''}</td></tr>`).join('')}</table></div></div>`;
+};
+const FREQ=[[1,'Diario'],[7,'Semanal'],[14,'Cada 2 semanas'],[30,'Mensual'],[90,'Trimestral'],[180,'Semestral'],[365,'Anual']];
+const frecTxt=d=>(FREQ.find(f=>f[0]==d)||[0,d+' días'])[1];
+function editPlan(id){
+  const p=DB.planes.find(x=>x.id===id)||{equipoId:'',descripcion:'',frecuencia:30,crew:'EMT',tareas:'',ultima:hoy(),activo:true};
+  modal_(`<h2>${id?'Editar':'Nuevo'} plan PM</h2><div class="grid">
+  <label>Equipo<select id="p_eq">${DB.equipos.map(e=>`<option value="${e.id}" ${e.id===p.equipoId?'selected':''}>${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select></label>
+  <label>Descripción<input id="p_desc" value="${esc(p.descripcion)}"></label>
+  <label>Frecuencia<select id="p_fr">${FREQ.map(f=>`<option value="${f[0]}" ${f[0]==p.frecuencia?'selected':''}>${f[1]}</option>`).join('')}</select></label>
+  <label>Crew<select id="p_crew">${['EMT','CONTROL','CONTRATISTA'].map(c=>`<option ${c===p.crew?'selected':''}>${c}</option>`).join('')}</select></label>
+  <label>Última realización<input type="date" id="p_ult" value="${p.ultima}"></label>
+  <label>Activo<select id="p_act"><option value="1">Sí</option><option value="0" ${p.activo?'':'selected'}>No</option></select></label></div>
+  <label>Tareas / checklist (una por línea)<textarea id="p_tar" rows="6">${esc(p.tareas)}</textarea></label>
+  <div class="row"><button class="btn" onclick="guardaPlan('${id||''}')">Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button>
+  ${id&&puede(3)?`<button class="btn r" onclick="borraPlan('${id}')">Eliminar</button>`:''}</div>`);
+}
+function guardaPlan(id){
+  const o={equipoId:p_eq.value,descripcion:p_desc.value.trim(),frecuencia:+p_fr.value,crew:p_crew.value,ultima:p_ult.value,activo:p_act.value==='1',tareas:p_tar.value};
+  if(!o.descripcion) return alert('Falta descripción');
+  if(id){Object.assign(DB.planes.find(x=>x.id===id),o);audit('Editó plan PM '+o.descripcion)}else{DB.planes.push({id:uid(),...o});audit('Creó plan PM '+o.descripcion)}
+  generarOTs();save();cerrar();R.planes();
+}
+function borraPlan(id){if(!confirm('¿Eliminar plan?'))return;DB.planes=DB.planes.filter(x=>x.id!==id);audit('Eliminó plan PM');save();cerrar();R.planes()}
+
+R.ots=()=>{
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Órdenes de Trabajo abiertas</h2>
+  <select id="fcrew" style="max-width:160px" onchange="R.ots2()"><option value="">Todas las crews</option><option>EMT</option><option>CONTROL</option><option>CONTRATISTA</option></select>
+  <button class="btn" onclick="nuevaCorr()">+ OT Correctiva / Falla</button></div><div id="tot"></div></div>`;R.ots2();
+};
+R.ots2=()=>{const c=fcrew.value;tot.innerHTML=tablaOT(DB.ots.filter(o=>o.estado!=='Completada'&&(!c||o.crew===c)).sort((a,b)=>a.fin.localeCompare(b.fin)))};
+function nuevaCorr(eid){
+  modal_(`<h2>Nueva OT correctiva</h2><div class="grid">
+  <label>Equipo<select id="c_eq">${DB.equipos.map(e=>`<option value="${e.id}" ${e.id===eid?'selected':''}>${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select></label>
+  <label>Crew<select id="c_crew"><option>EMT</option><option>CONTROL</option><option>CONTRATISTA</option></select></label>
+  <label>Fecha límite<input type="date" id="c_fin" value="${hoy()}"></label></div>
+  <label>Descripción de la falla<textarea id="c_desc" rows="3"></textarea></label>
+  <div class="row"><button class="btn" onclick="guardaCorr()">Crear OT</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
+}
+function guardaCorr(){
+  if(!c_desc.value.trim()) return alert('Describa la falla');
+  const o={id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:c_eq.value,tipo:'CM',descripcion:c_desc.value.trim(),crew:c_crew.value,inicio:hoy(),fin:c_fin.value,estado:'Abierta',asignado:'',creada:new Date().toLocaleString(),reporto:U.nombre};
+  DB.ots.push(o);audit('Creó OT correctiva '+o.num);save();cerrar();go('ots');
+}
+function cerrarOT(id){
+  const o=DB.ots.find(x=>x.id===id);const p=DB.planes.find(x=>x.id===o.planId);
+  const tareas=(p?p.tareas:'').split('\n').filter(Boolean);
+  modal_(`<h2>Completar ${o.num} – ${esc(eqN(o.equipoId))}</h2><p>${esc(o.descripcion)}</p>
+  <label><input type="checkbox" id="x_loto" style="width:auto"> <b>Lockout/Tagout aplicado y verificado</b></label>
+  ${tareas.length?'<b>Checklist</b>'+tareas.map((t,i)=>`<label><input type="checkbox" class="chk" style="width:auto" data-t="${esc(t)}"> ${esc(t)}</label>`).join(''):''}
+  <div class="grid"><label>Realizado por<input id="x_tec" value="${esc(U.nombre)}"></label>
+  <label>Fecha realizada<input type="date" id="x_f" value="${hoy()}"></label><label>Horas de labor<input type="number" step="0.25" id="x_h" value="1"></label>
+  <label>Resultado<select id="x_res"><option>OK – Sin hallazgos</option><option>OK – Con ajustes</option><option>Requiere seguimiento</option></select></label></div>
+  <div class="grid"><label>Repuestos usados<input id="x_rep"></label><label>Costo repuestos ($)<input type="number" step="0.01" min="0" id="x_cost" value="0"></label></div><label>Notas / hallazgos<textarea id="x_n" rows="3"></textarea></label>
+  <div class="row"><button class="btn v" onclick="guardaCierre('${id}')">✔ Completar OT</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
+}
+function guardaCierre(id){
+  if(!x_loto.checked) return alert('Debe confirmar Lockout/Tagout antes de completar.');
+  const o=DB.ots.find(x=>x.id===id);
+  const chk=[...document.querySelectorAll('.chk')].map(c=>(c.checked?'✔ ':'✘ ')+c.dataset.t);
+  Object.assign(o,{estado:'Completada',tecnico:x_tec.value,cierre:x_f.value,horas:+x_h.value,resultado:x_res.value,repuestos:x_rep.value,costo:+x_cost.value||0,loto:'Sí',notas:x_n.value,checklist:chk,cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString()});
+  const p=DB.planes.find(x=>x.id===o.planId);if(p) p.ultima=x_f.value;
+  if(o.resultado==='Requiere seguimiento') DB.ots.push({id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:o.equipoId,tipo:'CM',descripcion:'Seguimiento de '+o.num+': '+o.notas,crew:o.crew,inicio:hoy(),fin:addDias(hoy(),3),estado:'Abierta',asignado:'',creada:new Date().toLocaleString()});
+  audit(`Completó ${o.num} (${eqN(o.equipoId)}) – técnico: ${o.tecnico}`);generarOTs();save();cerrar();go(vista);
+}
+function verOT(id){const o=DB.ots.find(x=>x.id===id);
+  modal_(`<h2>${o.num} – ${esc(eqN(o.equipoId))}</h2><p><b>${esc(o.descripcion)}</b> (${o.tipo}, ${o.crew})</p>
+  <p>Realizado por: <b>${esc(o.tecnico)}</b> el ${o.cierre} · ${o.horas} h · ${esc(o.resultado)}</p>
+  <p>Repuestos: ${esc(o.repuestos||'-')}</p><p>Notas: ${esc(o.notas||'-')}</p>${(o.checklist||[]).map(c=>'<div>'+esc(c)+'</div>').join('')}
+  <p style="font-size:12px;color:#777">Cerrado en sistema por ${esc(o.cerradoPor)} – ${o.cerradoEn}</p><div class="row"><button class="btn" onclick="compartirOT('${o.id}')">📤 Compartir reporte</button><button class="btn s" onclick="cerrar()">Cerrar</button></div>`)}
+
+R.hist=(eid)=>{
+  const l=DB.ots.filter(o=>o.estado==='Completada'&&(!eid||o.equipoId===eid)).sort((a,b)=>b.cierre.localeCompare(a.cierre));
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Historial de mantenimiento ${eid?'– '+esc(eqN(eid)):''}</h2>
+  <button class="btn s" onclick="csvHist()">⬇ Exportar CSV</button></div>
+  <div class="tw"><table><tr><th>OT</th><th>Fecha</th><th>Equipo</th><th>Descripción</th><th>Tipo</th><th>Realizado por</th><th>Horas</th><th>Resultado</th><th></th></tr>
+  ${l.map(o=>`<tr><td>${o.num}</td><td>${o.cierre}</td><td>${esc(eqN(o.equipoId))}</td><td>${esc(o.descripcion)}</td><td>${o.tipo}</td><td>${esc(o.tecnico)}</td><td>${o.horas}</td><td>${esc(o.resultado)}</td>
+  <td><button class="btn sm s" onclick="verOT('${o.id}')">Ver</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button></td></tr>`).join('')||'<tr><td colspan="9">Sin registros.</td></tr>'}</table></div></div>`;
+};
+function histEq(id){vista='hist';go('hist');R.hist(id)}
+function csvHist(){
+  const rows=[['OT','Fecha','Equipo','Descripcion','Tipo','Crew','Tecnico','Horas','Resultado','Repuestos','Notas']].concat(
+   DB.ots.filter(o=>o.estado==='Completada').map(o=>[o.num,o.cierre,eqN(o.equipoId),o.descripcion,o.tipo,o.crew,o.tecnico,o.horas,o.resultado,o.repuestos,o.notas]));
+  bajar('historial_mantenimiento_'+hoy()+'.csv',rows.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv');
+}
+
+R.usuarios=()=>{
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Usuarios</h2><button class="btn" onclick="editU()">+ Nuevo usuario</button></div>
+  <table><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>WhatsApp</th><th></th></tr>${DB.usuarios.map(u=>`<tr><td>${esc(u.usuario)}</td><td>${esc(u.nombre)}</td><td>${u.rol}</td><td>${esc(u.tel||'-')}</td>
+  <td><button class="btn sm" onclick="editU('${u.id}')">Editar</button></td></tr>`).join('')}</table>
+  <p style="font-size:12px">Roles: <b>Técnico</b> completa OT y crea fallas · <b>Supervisor</b> + equipos, planes y respaldo · <b>Admin</b> + usuarios, borrar y auditoría.</p></div>`;
+};
+function editU(id){const u=DB.usuarios.find(x=>x.id===id)||{usuario:'',nombre:'',rol:'Técnico'};
+  modal_(`<h2>${id?'Editar':'Nuevo'} usuario</h2><div class="grid"><label>Usuario<input id="u_u" value="${esc(u.usuario)}"></label><label>Nombre<input id="u_n" value="${esc(u.nombre)}"></label>
+  <label>Rol<select id="u_r">${['Técnico','Supervisor','Admin'].map(r=>`<option ${r===u.rol?'selected':''}>${r}</option>`).join('')}</select></label>
+  <label>Contraseña ${id?'(vacío = no cambiar)':''}<input type="password" id="u_p"></label>
+  <label>WhatsApp (con código país, ej. 16095551234)<input id="u_tel" value="${esc(u.tel||'')}"></label></div>
+  <div class="row"><button class="btn" onclick="guardaU('${id||''}')">Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button>
+  ${id&&id!==U.id?`<button class="btn r" onclick="borraU('${id}')">Eliminar</button>`:''}</div>`)}
+async function guardaU(id){
+  const o={usuario:u_u.value.trim(),nombre:u_n.value.trim(),rol:u_r.value,tel:u_tel.value.replace(/\D/g,'')};
+  if(!o.usuario||!o.nombre) return alert('Complete usuario y nombre');
+  if(DB.usuarios.some(x=>x.usuario===o.usuario&&x.id!==id)) return alert('Usuario ya existe');
+  if(u_p.value) o.pass=await hash(u_p.value); else if(!id) return alert('Asigne contraseña');
+  if(id) Object.assign(DB.usuarios.find(x=>x.id===id),o); else DB.usuarios.push({id:uid(),...o});
+  audit((id?'Editó':'Creó')+' usuario '+o.usuario);save();cerrar();R.usuarios();
+}
+function borraU(id){if(!confirm('¿Eliminar usuario?'))return;DB.usuarios=DB.usuarios.filter(x=>x.id!==id);audit('Eliminó usuario');save();cerrar();R.usuarios()}
+
+R.datos=()=>{main.innerHTML=`<div class="card"><h2>Respaldo de datos</h2>
+  <p>Los datos se guardan en la base de datos interna del programa (IndexedDB) en este equipo. Haga un respaldo periódico y úselo para pasar los datos a otra PC o al iPhone.</p>
+  <div class="row"><button class="btn" onclick="bajar('mantenipro_respaldo_'+hoy()+'.json',JSON.stringify(DB,null,1),'application/json');audit('Exportó respaldo')">⬇ Descargar respaldo (JSON)</button>
+  <label class="btn s" style="margin:0">⬆ Restaurar respaldo<input type="file" accept=".json" style="display:none" onchange="importar(this)"></label>
+  ${puede(3)?'<button class="btn r" onclick="borrarBD()">Reiniciar sistema</button>':''}</div></div>`};
+function importar(inp){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.equipos)throw 0;DB=d;audit('Restauró respaldo');save();alert('Respaldo restaurado');go('dash')}catch(e){alert('Archivo inválido')}};r.readAsText(inp.files[0])}
+
+R.audit=()=>{main.innerHTML=`<div class="card"><h2>Auditoría</h2><div class="tw"><table><tr><th>Fecha</th><th>Usuario</th><th>Acción</th></tr>
+  ${DB.log.map(l=>`<tr><td>${l.f}</td><td>${esc(l.u)}</td><td>${esc(l.a)}</td></tr>`).join('')}</table></div></div>`};
+
+/* ===================== WHATSAPP ===================== */
+const WA=()=>DB.wa||(DB.wa={tel:'',auto:false,apikey:'',ultimo:''});
+const otTxt=o=>`• ${o.num} | ${eqN(o.equipoId)} | ${o.descripcion} | Límite ${o.fin}${diff(o.fin)<0?' ⚠️ VENCIDA '+(-diff(o.fin))+'d':''}${eqO(o.equipoId).prioridad>=7?' 🔴 CRÍTICO':''} | Status: ${eqO(o.equipoId).status||'Bajo'}`;
+function msgResumen(){
+  const ab=DB.ots.filter(o=>o.estado!=='Completada'&&diff(o.fin)<=7).sort((a,b)=>a.fin.localeCompare(b.fin));
+  const v=ab.filter(o=>diff(o.fin)<0).length;
+  const al=DB.equipos.filter(e=>e.status==='Alto');
+  return `🔧 *ManteniPro – Alerta de Mantenimiento* (${hoy()})\nVencidas: ${v} | Vencen ≤7 días: ${ab.length-v}\nEquipos status ALTO: ${al.length}${al.length?' ('+al.map(e=>e.nombre).join(', ')+')':''}\n\n`+(ab.map(otTxt).join('\n')||'Sin PM pendientes ✅');
+}
+function abrirWA(tel,txt){
+  tel=(tel||'').replace(/\D/g,'');
+  window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(txt),'_blank');
+  audit('Envió alerta WhatsApp'+(tel?' a '+tel:''));
+}
+function waResumen(){elegirDest(msgResumen())}
+function waOT(id){const o=DB.ots.find(x=>x.id===id);
+  elegirDest(`🔧 *ManteniPro – Orden de Trabajo*\n${otTxt(o)}\nTipo: ${o.tipo} | Crew: ${o.crew}\nFavor completar y registrar en ManteniPro.`)}
+function elegirDest(txt){
+  window._waTxt=txt;
+  const us=DB.usuarios.filter(u=>u.tel);
+  modal_(`<h2>📲 Enviar por WhatsApp</h2><textarea id="w_txt" rows="9">${esc(txt)}</textarea>
+  <label>Enviar a<select id="w_dest"><option value="">Elegir contacto/grupo en WhatsApp</option>
+  ${WA().tel?`<option value="${WA().tel}">Número predeterminado (${WA().tel})</option>`:''}
+  ${us.map(u=>`<option value="${u.tel}">${esc(u.nombre)} (${u.tel})</option>`).join('')}</select></label>
+  <div class="row"><button class="btn v" onclick="abrirWA(w_dest.value,w_txt.value);cerrar()">Abrir WhatsApp</button><button class="btn" onclick="compartir(w_txt.value)">📤 Otras apps</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>
+  <p style="font-size:12px;color:#777">Se abre WhatsApp con el mensaje listo; usted presiona Enviar. "Elegir contacto/grupo" permite enviarlo a un grupo.</p>`);
+}
+R.whats=()=>{const w=WA();
+  main.innerHTML=`<div class="card"><h2>📲 Alertas por WhatsApp</h2>
+  <h3>1. Envío manual (gratis, recomendado)</h3>
+  <p>Use <b>📲 Enviar resumen</b> en el Dashboard o el botón 📲 en cada orden. Los números de técnicos se guardan en <b>Usuarios</b>.</p>
+  <label>Número predeterminado (supervisor o líder, con código país, ej. 16095551234)<input id="w_tel" value="${esc(w.tel)}"></label>
+  <h3>2. Alerta automática diaria (opcional – CallMeBot, gratis)</h3>
+  <p style="font-size:13px">Una vez al día, al abrir ManteniPro, se envía el resumen al número predeterminado. Para obtener la API key: agregue <b>+34 644 51 95 23</b> a sus contactos y envíele por WhatsApp: <code>I allow callmebot to send me messages</code>. Le responderá con su API key.</p>
+  <div class="grid"><label>API key CallMeBot<input id="w_key" value="${esc(w.apikey)}"></label>
+  <label>Alerta automática<select id="w_auto"><option value="0">Desactivada</option><option value="1" ${w.auto?'selected':''}>Activada</option></select></label></div>
+  <p style="font-size:12px">Último envío automático: ${w.ultimo||'nunca'}</p>
+  <div class="row"><button class="btn" onclick="guardaWA()">Guardar</button><button class="btn s" onclick="guardaWA();autoWA(true)">Enviar prueba automática</button>
+  <button class="btn v" onclick="waResumen()">Probar envío manual</button></div></div>`};
+function guardaWA(){const w=WA();w.tel=w_tel.value.replace(/\D/g,'');w.apikey=w_key.value.trim();w.auto=w_auto.value==='1';audit('Configuró WhatsApp');save();alert('Guardado')}
+function autoWA(forzar){const w=WA();
+  if(!w.tel||!w.apikey) return forzar&&alert('Falta número predeterminado o API key');
+  if(!forzar&&(!w.auto||w.ultimo===hoy())) return;
+  fetch('https://api.callmebot.com/whatsapp.php?phone='+w.tel+'&apikey='+encodeURIComponent(w.apikey)+'&text='+encodeURIComponent(msgResumen()),{mode:'no-cors'})
+   .then(()=>{w.ultimo=hoy();audit('Alerta automática WhatsApp enviada a '+w.tel);save();forzar&&alert('Enviado. Revise su WhatsApp.')})
+   .catch(()=>forzar&&alert('Sin conexión a internet'));
+}
+
+/* ===================== COMPARTIR ===================== */
+function txtOT(o){
+  if(o.estado==='Completada') return `✅ *ManteniPro – Reporte de Mantenimiento*\nOT ${o.num} | ${eqN(o.equipoId)}\n${o.descripcion} (${o.tipo}, ${o.crew})\nRealizado por: ${o.tecnico} el ${o.cierre} · ${o.horas} h\nResultado: ${o.resultado}\nRepuestos: ${o.repuestos||'-'}\nNotas: ${o.notas||'-'}`+((o.checklist||[]).length?'\n'+o.checklist.join('\n'):'');
+  return `🔧 *ManteniPro – Orden de Trabajo*\n${otTxt(o)}\nTipo: ${o.tipo} | Crew: ${o.crew}\nFavor completar y registrar en ManteniPro.`;
+}
+function compartirOT(id){const o=DB.ots.find(x=>x.id===id);compartir(txtOT(o),'ManteniPro '+o.num)}
+function compartir(txt,asunto){
+  window._shTxt=txt;window._shAs=asunto||'ManteniPro – Mantenimiento';
+  modal_(`<h2>📤 Compartir mensaje</h2><textarea id="sh_txt" rows="9">${esc(txt)}</textarea>
+  <div class="row" style="margin-top:10px">
+   ${navigator.share?'<button class="btn" onclick="shNativo()">📱 Compartir…</button>':''}
+   <button class="btn v" onclick="shAbrir(\'wa\')">📲 WhatsApp</button>
+   <button class="btn" style="background:#5b5fc7" onclick="shAbrir(\'teams\')">💬 Teams</button>
+   <button class="btn" onclick="shAbrir(\'mail\')">✉️ Correo</button>
+   <button class="btn" onclick="shAbrir(\'sms\')">💭 SMS</button>
+   <button class="btn s" onclick="shCopiar()">📋 Copiar</button>
+   <button class="btn s" onclick="cerrar()">Cerrar</button></div>
+  <p id="sh_ok" style="font-size:12px;color:var(--verde)"></p>
+  <p style="font-size:12px;color:#777">Puede editar el texto antes de compartir. "Compartir…" usa el menú del teléfono o de Windows.</p>`);
+}
+function shAbrir(m){
+  const t=sh_txt.value,e=encodeURIComponent(t),a=encodeURIComponent(window._shAs);
+  const url={wa:'https://wa.me/?text='+e,teams:'https://teams.microsoft.com/share?msgText='+e,mail:'mailto:?subject='+a+'&body='+e,sms:'sms:?&body='+e}[m];
+  if(m==='mail'||m==='sms') location.href=url; else window.open(url,'_blank');
+  audit('Compartió mensaje por '+{wa:'WhatsApp',teams:'Teams',mail:'Correo',sms:'SMS'}[m]);
+}
+async function shNativo(){
+  try{await navigator.share({title:window._shAs,text:sh_txt.value});audit('Compartió mensaje (menú del sistema)')}catch(e){}
+}
+async function shCopiar(){
+  const t=sh_txt.value;
+  try{await navigator.clipboard.writeText(t)}catch(e){sh_txt.select();document.execCommand('copy')}
+  sh_ok.textContent='✔ Copiado. Péguelo donde quiera (Ctrl+V).';audit('Copió mensaje');
+}
+
+/* ===================== BASE DE DATOS / REGISTROS ===================== */
+const regs=()=>DB.ots.filter(o=>o.estado==='Completada');
+R.bd=()=>{
+  const tecs=[...new Set(regs().map(o=>o.tecnico).filter(Boolean))].sort();
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">🗄️ Base de Datos – Registros de Mantenimiento</h2>
+   <button class="btn" onclick="nuevoReg()">+ Nuevo registro</button><button class="btn v" onclick="exportXLSX()">⬇ Exportar Base de Datos a Excel</button></div>
+  <div class="grid"><label>Desde<input type="date" id="b_d" onchange="R.bd2()"></label><label>Hasta<input type="date" id="b_h" onchange="R.bd2()"></label>
+  <label>Equipo<select id="b_e" onchange="R.bd2()"><option value="">Todos</option>${DB.equipos.map(e=>`<option value="${e.id}">${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select></label>
+  <label>Técnico<select id="b_t" onchange="R.bd2()"><option value="">Todos</option>${tecs.map(t=>`<option>${esc(t)}</option>`).join('')}</select></label>
+  <label>Tipo<select id="b_ti" onchange="R.bd2()"><option value="">PM y CM</option><option>PM</option><option>CM</option></select></label>
+  <label>Buscar<input id="b_q" oninput="R.bd2()" placeholder="texto, OT, notas..."></label></div>
+  <div class="kpis" id="b_k"></div><div id="b_tab"></div></div>${puede(2)?'<div class="card" id="b_motor"></div>':''}`;R.bd2();puede(2)&&motorBD();
+};
+function filtroRegs(){
+  const d=b_d.value,h=b_h.value,e=b_e.value,t=b_t.value,ti=b_ti.value,q=b_q.value.toLowerCase();
+  return regs().filter(o=>(!d||o.cierre>=d)&&(!h||o.cierre<=h)&&(!e||o.equipoId===e)&&(!t||o.tecnico===t)&&(!ti||o.tipo===ti)&&(!q||(o.num+' '+eqN(o.equipoId)+' '+o.descripcion+' '+(o.notas||'')+' '+(o.repuestos||'')).toLowerCase().includes(q)))
+   .sort((a,b)=>b.cierre.localeCompare(a.cierre)||b.num.localeCompare(a.num));
+}
+R.bd2=()=>{
+  const l=filtroRegs(),hrs=l.reduce((a,o)=>a+(+o.horas||0),0),cst=l.reduce((a,o)=>a+(+o.costo||0),0);
+  b_k.innerHTML=`<div class="kpi">Registros<b>${l.length}</b></div><div class="kpi v">Preventivos (PM)<b>${l.filter(o=>o.tipo==='PM').length}</b></div>
+   <div class="kpi a">Correctivos (CM)<b>${l.filter(o=>o.tipo==='CM').length}</b></div><div class="kpi">Horas de labor<b>${hrs.toFixed(2)}</b></div>
+   <div class="kpi">Costo repuestos<b>$${cst.toFixed(2)}</b></div><div class="kpi r">Requieren seguimiento<b>${l.filter(o=>o.resultado==='Requiere seguimiento').length}</b></div>`;
+  b_tab.innerHTML=`<div class="tw"><table><tr><th>N° Registro</th><th>Fecha</th><th>Equipo</th><th>Tipo</th><th>Descripción</th><th>Técnico</th><th>Horas</th><th>Resultado</th><th>Repuestos</th><th>Costo</th><th></th></tr>
+  ${l.map(o=>`<tr><td>${o.num}</td><td>${o.cierre}</td><td>${esc(eqN(o.equipoId))}</td><td>${o.tipo}</td><td>${esc(o.descripcion)}</td><td>${esc(o.tecnico)}</td><td>${o.horas}</td>
+  <td>${o.resultado==='Requiere seguimiento'?'<span class="tag t-r">Requiere seguimiento</span>':esc(o.resultado)}</td><td>${esc(o.repuestos||'')}</td><td>${o.costo?'$'+(+o.costo).toFixed(2):''}</td>
+  <td><button class="btn sm s" onclick="verOT('${o.id}')">Ver</button> <button class="btn sm s" title="Compartir" onclick="compartirOT('${o.id}')">📤</button></td></tr>`).join('')||'<tr><td colspan="11">Sin registros con estos filtros.</td></tr>'}</table></div>`;
+};
+function nuevoReg(){
+  modal_(`<h2>Nuevo registro de mantenimiento</h2><p style="font-size:12px;color:#666">Para trabajos ya realizados que no tenían orden en el sistema.</p><div class="grid">
+  <label>Equipo<select id="n_eq">${DB.equipos.map(e=>`<option value="${e.id}">${esc(e.codigo+' – '+e.nombre)}</option>`).join('')}</select></label>
+  <label>Tipo<select id="n_ti"><option value="PM">PM – Preventivo</option><option value="CM">CM – Correctivo</option></select></label>
+  <label>Crew<select id="n_cr"><option>EMT</option><option>CONTROL</option><option>CONTRATISTA</option></select></label>
+  <label>Fecha realizada<input type="date" id="n_f" value="${hoy()}" max="${hoy()}"></label>
+  <label>Técnico<input id="n_tec" value="${esc(U.nombre)}"></label><label>Horas<input type="number" step="0.25" min="0" id="n_h" value="1"></label>
+  <label>Resultado<select id="n_res"><option>OK – Sin hallazgos</option><option>OK – Con ajustes</option><option>Requiere seguimiento</option></select></label>
+  <label>Costo repuestos ($)<input type="number" step="0.01" min="0" id="n_c" value="0"></label></div>
+  <label>Descripción del trabajo<input id="n_d"></label><label>Repuestos usados<input id="n_r"></label><label>Notas / hallazgos<textarea id="n_n" rows="3"></textarea></label>
+  <label><input type="checkbox" id="n_loto" style="width:auto"> <b>Lockout/Tagout aplicado y verificado</b></label>
+  <div class="row"><button class="btn v" onclick="guardaReg()">Guardar registro</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`);
+}
+function guardaReg(){
+  if(!n_d.value.trim()) return alert('Escriba la descripción del trabajo');
+  if(!n_tec.value.trim()) return alert('Escriba el técnico');
+  if(n_f.value>hoy()) return alert('La fecha no puede ser futura');
+  if(!n_loto.checked) return alert('Debe confirmar Lockout/Tagout.');
+  const o={id:uid(),num:'F'+(++DB.seq),planId:null,equipoId:n_eq.value,tipo:n_ti.value,descripcion:n_d.value.trim(),crew:n_cr.value,inicio:n_f.value,fin:n_f.value,
+   estado:'Completada',asignado:'',creada:new Date().toLocaleString(),tecnico:n_tec.value.trim(),cierre:n_f.value,horas:+n_h.value||0,resultado:n_res.value,
+   repuestos:n_r.value,costo:+n_c.value||0,notas:n_n.value,loto:'Sí',checklist:[],cerradoPor:U.nombre,cerradoEn:new Date().toLocaleString(),manual:true};
+  DB.ots.push(o);audit(`Registro manual ${o.num} (${eqN(o.equipoId)}) – técnico: ${o.tecnico}`);save();cerrar();R.bd();
+}
+/* ---- Panel del motor de base de datos ---- */
+const NOMT={equipos:'Equipos',planes:'Planes PM',ots:'Órdenes / Registros',usuarios:'Usuarios',log:'Auditoría'};
+async function motorBD(){
+  let est='',per='';
+  try{const e=await navigator.storage.estimate();est=(e.usage/1024).toFixed(1)+' KB usados de '+(e.quota/1048576).toFixed(0)+' MB disponibles'}catch(x){est='n/d'}
+  try{per=await navigator.storage.persisted()?'<span class="tag t-v">Persistente</span>':'<span class="tag t-a">Normal</span>'}catch(x){per='n/d'}
+  const tam=t=>(new Blob([JSON.stringify(DB[t])]).size/1024).toFixed(1);
+  b_motor.innerHTML=`<div class="row"><h2 style="flex:1">⚙️ Base de datos interna</h2>
+   <button class="btn s" onclick="integridadBD()">🩺 Verificar integridad</button>
+   <button class="btn s" onclick="bajar('mantenipro_respaldo_'+hoy()+'.json',JSON.stringify(DB,null,1),'application/json');audit('Exportó respaldo')">💾 Respaldo JSON</button></div>
+   <div class="grid" style="font-size:13px"><div><b>Motor:</b> ${IDB?'IndexedDB – "'+DBNAME+'"':'<span class="tag t-a">localStorage (modo compatible)</span>'}</div>
+   <div><b>Espacio:</b> ${est}</div><div><b>Almacenamiento:</b> ${per}</div><div><b>Último guardado:</b> ${ULTIMO_GUARDADO||'-'}</div></div>
+   <table style="margin-top:10px"><tr><th>Tabla</th><th>Registros</th><th>Tamaño (KB)</th><th></th></tr>
+   ${Object.keys(NOMT).map(t=>`<tr><td>${NOMT[t]} <small style="color:#888">(${t})</small></td><td>${DB[t].length}</td><td>${tam(t)}</td>
+   <td><button class="btn sm s" onclick="verTabla('${t}')">Ver tabla</button></td></tr>`).join('')}</table>`;
+}
+function verTabla(t){
+  const filas=DB[t].slice(0,300).map(x=>{const y={...x};delete y.pass;if(y.checklist)y.checklist=y.checklist.length+' ítems';if(y.tareas)y.tareas=y.tareas.split('\n').length+' tareas';return y});
+  const cols=[...new Set(filas.flatMap(Object.keys))].filter(c=>c!=='id');
+  modal_(`<h2>Tabla: ${NOMT[t]} (${DB[t].length} registros)</h2>${DB[t].length>300?'<p style="font-size:12px">Mostrando los primeros 300.</p>':''}
+   <div class="tw" style="max-height:60vh"><table><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr>
+   ${filas.map(f=>`<tr>${cols.map(c=>`<td>${esc(c==='equipoId'?eqN(f[c]):typeof f[c]==='object'&&f[c]!==null?JSON.stringify(f[c]):f[c])}</td>`).join('')}</tr>`).join('')||'<tr><td>Vacía</td></tr>'}</table></div>
+   <div class="row"><button class="btn s" onclick="cerrar()">Cerrar</button></div>`);
+  document.querySelector('#modal .card').style.maxWidth='1100px';
+}
+function integridadBD(){
+  const ids=new Set(DB.equipos.map(e=>e.id)),p=[];
+  const dupC=DB.equipos.map(e=>e.codigo).filter((c,i,a)=>a.indexOf(c)!==i);
+  if(dupC.length)p.push('Códigos de equipo duplicados: '+[...new Set(dupC)].join(', '));
+  const pl=DB.planes.filter(x=>!ids.has(x.equipoId));if(pl.length)p.push(pl.length+' plan(es) PM sin equipo');
+  const ot=DB.ots.filter(x=>!ids.has(x.equipoId));if(ot.length)p.push(ot.length+' orden(es)/registro(s) con equipo eliminado');
+  const dn=DB.ots.map(o=>o.num).filter((c,i,a)=>a.indexOf(c)!==i);if(dn.length)p.push('Números de OT duplicados: '+[...new Set(dn)].join(', '));
+  const sl=DB.ots.filter(o=>o.estado==='Completada'&&(!o.tecnico||!o.cierre));if(sl.length)p.push(sl.length+' registro(s) completados sin técnico o fecha');
+  const se=DB.equipos.filter(e=>!e.status);if(se.length)p.push(se.length+' equipo(s) sin status');
+  audit('Verificó integridad de la base de datos: '+(p.length?p.length+' problema(s)':'OK'));
+  alert(p.length?'⚠️ Problemas encontrados:\n\n• '+p.join('\n• '):'✅ Base de datos íntegra: sin problemas.\n\n'+DB.equipos.length+' equipos · '+DB.planes.length+' planes · '+DB.ots.length+' órdenes/registros · '+DB.usuarios.length+' usuarios');
+}
+
+/* ---- Exportar XLSX real (sin librerías) ---- */
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zip(files){
+  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
+  const u16=v=>[v&255,(v>>8)&255],u32=v=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+  for(const [name,txt] of files){
+    const n=enc.encode(name),d=enc.encode(txt),c=crc32(d);
+    const h=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0),...u32(c),...u32(d.length),...u32(d.length),...u16(n.length),...u16(0)]);
+    parts.push(h,n,d);
+    cen.push(new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0x0800),...u16(0),...u16(0),...u16(0),...u32(c),...u32(d.length),...u32(d.length),...u16(n.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),n);
+    off+=h.length+n.length+d.length;
+  }
+  const cs=cen.reduce((a,x)=>a+x.length,0);
+  const end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(files.length),...u16(files.length),...u32(cs),...u32(off),...u16(0)]);
+  return new Blob([...parts,...cen,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+function colL(i){let s='';i++;while(i){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=(i-m-1)/26}return s}
+const xe=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
+function hojaXML(rows,anchos){
+  const cols='<cols>'+anchos.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')+'</cols>';
+  const data=rows.map((r,ri)=>`<row r="${ri+1}">`+r.map((v,ci)=>{const ref=colL(ci)+(ri+1),s=ri===0?' s="1"':'';
+    if(v===null||v===undefined||v==='') return ri===0?`<c r="${ref}"${s}/>`:'';
+    if(typeof v==='number'&&isFinite(v)) return `<c r="${ref}"${s}><v>${v}</v></c>`;
+    return `<c r="${ref}" t="inlineStr"${s}><is><t xml:space="preserve">${xe(v)}</t></is></c>`}).join('')+'</row>').join('');
+  const last=colL(rows[0].length-1)+rows.length;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>${cols}<sheetData>${data}</sheetData><autoFilter ref="A1:${last}"/></worksheet>`;
+}
+function libroXLSX(hojas){
+  const ws=hojas.map((h,i)=>[`xl/worksheets/sheet${i+1}.xml`,hojaXML(h.rows,h.w)]);
+  const f=[['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${hojas.map((h,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`],
+   ['_rels/.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`],
+   ['xl/workbook.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${hojas.map((h,i)=>`<sheet name="${xe(h.n)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets>${hojas.map((h,i)=>`<definedNames><definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${h.n}'!$A$1:$${colL(h.rows[0].length-1)}$${h.rows.length}</definedName></definedNames>`).slice(0,0).join('')}</workbook>`],
+   ['xl/_rels/workbook.xml.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${hojas.map((h,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${hojas.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`],
+   ['xl/styles.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Arial"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0B3D91"/></patternFill></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf/></cellStyleXfs><cellXfs count="2"><xf fontId="0" fillId="0" borderId="0"/><xf fontId="1" fillId="2" borderId="0" applyFont="1" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`],
+   ...ws];
+  return zip(f);
+}
+function exportXLSX(){
+  const l=document.getElementById('b_d')?filtroRegs():regs();
+  const eqC=id=>(eqO(id).codigo||'');
+  const hojas=[
+   {n:'Registros',w:[12,12,16,32,8,40,11,22,8,10,22,26,12,40,18],rows:[['N° Registro','Fecha','Código Equipo','Equipo','Tipo','Descripción del trabajo','Crew','Técnico','Horas','LOTO aplicado','Resultado','Repuestos usados','Costo repuestos ($)','Hallazgos / Notas','Registrado por'],
+     ...l.map(o=>[o.num,o.cierre,eqC(o.equipoId),eqN(o.equipoId),o.tipo,o.descripcion,o.crew,o.tecnico,+o.horas||0,o.loto||'Sí',o.resultado,o.repuestos||'',+o.costo||0,o.notas||'',o.cerradoPor||''])]},
+   {n:'Equipos',w:[16,36,22,32,14,14,10,10,18],rows:[['Código','Nombre','Tipo','Ubicación','Marca','Serie','Prioridad','Status','Estado'],...DB.equipos.map(e=>[e.codigo,e.nombre,e.tipo,e.ubicacion,e.marca,e.serie,e.prioridad,e.status,e.estado])]},
+   {n:'Planes_PM',w:[16,34,48,12,12,14,14,12],rows:[['Código Equipo','Equipo','Descripción PM','Frecuencia (días)','Crew','Última realización','Próximo PM','Activo'],...DB.planes.map(p=>[eqC(p.equipoId),eqN(p.equipoId),p.descripcion,p.frecuencia,p.crew,p.ultima,prox(p),p.activo?'Sí':'No'])]},
+   {n:'OT_Abiertas',w:[10,16,32,40,8,11,12,12,12],rows:[['OT','Código Equipo','Equipo','Descripción','Tipo','Crew','Inicio','Límite','Estado'],...DB.ots.filter(o=>o.estado!=='Completada').map(o=>[o.num,eqC(o.equipoId),eqN(o.equipoId),o.descripcion,o.tipo,o.crew,o.inicio,o.fin,o.estado])]}];
+  const b=libroXLSX(hojas),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='ManteniPro_BaseDatos_'+hoy()+'.xlsx';a.click();
+  audit(`Exportó base de datos a Excel (${l.length} registros)`);
+}
+
+/* ===================== UTILIDADES ===================== */
+function modal_(h){mbody.innerHTML=h;modal.style.display='flex'}
+function cerrar(){modal.style.display='none'}
+function bajar(n,txt,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:t}));a.download=n;a.click()}
+lp.addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+function addBaterias(){
+  if(DB.equipos.some(e=>e.codigo==='BATLVL1')) return;
+  const e={id:uid(),codigo:'BATLVL1',nombre:'Medidor de Nivel de Líquido de Baterías',tipo:'Instrumento – Baterías',ubicacion:'FLR – Cuarto de Carga de Baterías',prioridad:7,marca:'',serie:'',estado:'Operativo',status:'Bajo'};
+  DB.equipos.push(e);
+  DB.planes.push({id:uid(),equipoId:e.id,descripcion:'Inspección Nivel de Líquido (Electrolito) de Baterías – CRITICAL',frecuencia:7,crew:'EMT',activo:true,ultima:hoy(),
+   tareas:['EPP: careta, gafas y guantes resistentes a ácido','Verificar lavaojos/ducha de emergencia y ventilación del área','Batería completamente cargada antes de rellenar','Medir nivel en cada celda con el medidor','Nivel correcto: sobre las placas, sin pasar el indicador de llenado','Rellenar solo con agua destilada; no sobrellenar','Registrar celdas con nivel bajo y la densidad si aplica','Revisar corrosión, fugas y conexiones','Verificar calibración/funcionamiento del medidor'].join('\n')});
+  if(typeof audit==='function') DB.log.unshift({f:new Date().toLocaleString(),u:'Sistema',a:'Agregó equipo BATLVL1 – Medidor de Nivel de Líquido de Baterías'});
+}
+(async()=>{await listo;const s=sessionStorage.getItem('mp_u');if(s){U=DB.usuarios.find(u=>u.id===s);if(U)start()}})();
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
