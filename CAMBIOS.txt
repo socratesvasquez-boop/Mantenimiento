@@ -1,4 +1,4 @@
-ManteniPro v1.7.0
+ManteniPro v1.8.0 - Ferreteria Quilvio
 - Equipos, Planes PM, Ordenes de Trabajo, Historial (CSV)
 - OT de PM automaticas (7 dias antes), OT correctivas
 - Cierre de OT con checklist
@@ -17,3 +17,4 @@ ManteniPro v1.7.0
 - Pop-up de alerta cuando hay mantenimientos vencidos + indicador en la barra superior
 - El pop-up de vencidos parpadea cada 2 segundos
 - Usuarios y contrasenas: confirmar, mostrar, reglas, cifrado con sal, activar/desactivar, restablecer, Mi contrasena, cambio obligatorio al primer ingreso
+- Logo y nombre de Ferreteria Quilvio (inicio de sesion, barra superior, icono de app, mensajes); el Admin puede cambiar logo y nombre
