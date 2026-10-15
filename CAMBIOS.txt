@@ -1,4 +1,4 @@
-ManteniPro v1.6.0
+ManteniPro v1.7.0
 - Equipos, Planes PM, Ordenes de Trabajo, Historial (CSV)
 - OT de PM automaticas (7 dias antes), OT correctivas
 - Cierre de OT con checklist
@@ -14,3 +14,6 @@ ManteniPro v1.6.0
 - Boton para borrar ordenes de trabajo (con motivo, confirmacion y auditoria)
 - Planes PM: agregar, editar, duplicar y eliminar; frecuencia personalizada; filtros; + Plan PM desde Equipos
 - Se elimino el requisito de Lockout/Tagout
+- Pop-up de alerta cuando hay mantenimientos vencidos + indicador en la barra superior
+- El pop-up de vencidos parpadea cada 2 segundos
+- Usuarios y contrasenas: confirmar, mostrar, reglas, cifrado con sal, activar/desactivar, restablecer, Mi contrasena, cambio obligatorio al primer ingreso

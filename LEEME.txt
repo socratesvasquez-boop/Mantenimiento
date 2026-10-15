@@ -3,7 +3,7 @@ MANTENIPRO - Mantenimiento de Equipos
 WINDOWS
  1. Descomprima el ZIP (clic derecho > Extraer todo).
  2. Doble clic en INSTALAR.bat
- 3. Abra "ManteniPro" desde el Escritorio. Usuario: admin / admin123
+ 3. Abra "ManteniPro" desde el Escritorio. Usuario: admin / admin123 (el sistema pedira cambiarla)
 
 WEB / IPHONE (GitHub Pages, gratis)
  1. Suba TODO el contenido de esta carpeta a la raiz del repositorio.

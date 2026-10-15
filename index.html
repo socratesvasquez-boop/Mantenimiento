@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="theme-color" content="#0b3d91">
-<title>ManteniPro v1.6.0 - Mantenimiento de Equipos</title>
+<title>ManteniPro v1.7.0 - Mantenimiento de Equipos</title>
 <style>
 :root{--azul:#0b3d91;--azul2:#1565c0;--rojo:#c62828;--ama:#f9a825;--verde:#2e7d32;--gris:#f3f5f9;--borde:#d5dbe5}
 *{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--gris);color:#1d2433}
@@ -35,6 +35,14 @@ label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
 .modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:9;padding:10px}
 .modal .card{width:100%;max-width:620px;max-height:92vh;overflow:auto}
 .hide{display:none}h2{margin:4px 0 12px;font-size:18px}
+.alerta-v{border:4px solid var(--rojo);animation:pop .25s ease-out,parpadeo 2s ease-in-out .25s infinite}
+.alerta-v h2{animation:parpadeoTxt 2s ease-in-out infinite}
+@keyframes parpadeo{0%,100%{border-color:var(--rojo);box-shadow:0 0 0 0 rgba(198,40,40,.0);background:#fff}
+ 50%{border-color:#ff5252;box-shadow:0 0 28px 8px rgba(198,40,40,.75);background:#ffebee}}
+@keyframes parpadeoTxt{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.alerta-v,.alerta-v h2{animation:none}}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+#bellV{animation:parpadeoTxt 2s ease-in-out infinite;background:var(--rojo);color:#fff;border:none;border-radius:14px;padding:3px 10px;cursor:pointer;font-weight:bold;display:none}
 </style>
 </head>
 <body>
@@ -45,11 +53,11 @@ label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
   <label>Usuario<input id="lu" autocomplete="username"></label>
   <label>Contraseña<input id="lp" type="password" autocomplete="current-password"></label>
   <button class="btn" onclick="login()">Entrar</button>
-  <p style="font-size:12px;color:#777">Primer uso: <b>admin</b> / <b>admin123</b> (cámbiela en Usuarios)</p>
+  <p style="font-size:12px;color:#777">Primer uso: <b>admin</b> / <b>admin123</b> (el sistema le pedirá cambiarla)</p>
 </div>
 
 <div id="app" class="hide">
-<header><h1>🔧 ManteniPro – Mantenimiento de Equipos <small style="font-size:11px;opacity:.7">v1.6.0</small></h1><span id="who"></span><button class="btn s sm" onclick="logout()">Salir</button></header>
+<header><h1>🔧 ManteniPro – Mantenimiento de Equipos <small style="font-size:11px;opacity:.7">v1.7.0</small></h1><button id="bellV" title="Mantenimientos vencidos" onclick="popupVencidos(true)"></button><span id="who"></span><button class="btn s sm" onclick="cambiarPass(false)">🔑 Mi contraseña</button><button class="btn s sm" onclick="logout()">Salir</button></header>
 <nav id="nav"></nav>
 <main id="main"></main>
 </div>
@@ -83,13 +91,13 @@ async function idbLoad(){
   return {equipos,planes,ots,usuarios,log,seq:cf.seq||1000,wa:cf.wa||undefined};
 }
 function save(){
-  if(!IDB){try{localStorage.setItem(K,JSON.stringify(DB))}catch(e){alert('No se pudo guardar: '+e)}return}
+  if(!IDB){try{localStorage.setItem(K,JSON.stringify(DB));return Promise.resolve(true)}catch(e){alert('No se pudo guardar: '+e);return Promise.resolve(false)}}
   const tx=IDB.transaction(TABLAS,'readwrite');
   ['equipos','planes','ots','usuarios'].forEach(t=>{const st=tx.objectStore(t);st.clear();DB[t].forEach(x=>st.put(x))});
   const l=tx.objectStore('log');l.clear();DB.log.forEach((x,i)=>l.put(x,i));
   ULTIMO_GUARDADO=new Date().toLocaleString();
   const c=tx.objectStore('config');c.put({k:'seq',v:DB.seq});c.put({k:'wa',v:DB.wa||null});c.put({k:'guardado',v:ULTIMO_GUARDADO});
-  tx.onerror=()=>alert('Error al guardar en la base de datos: '+tx.error);
+  return new Promise(res=>{tx.oncomplete=()=>res(true);tx.onerror=()=>{alert('Error al guardar en la base de datos: '+tx.error);res(false)}});
 }
 function borrarBD(){
   if(!confirm('¿Borrar TODA la base de datos y reiniciar? Haga un respaldo antes.'))return;
@@ -124,7 +132,7 @@ async function seed(){
    [6,'Inspección Cámara Cognex',30,'CONTROL','Limpiar lente\nVerificar iluminación\nRespaldo de job'],[7,'End of Shift Inspection',1,'CONTROL','Inspección visual\nRevisar atascos'],
    [8,'Robot PM / Calibración',180,'CONTROL','Respaldo de programa\nVerificar calibración\nRevisar cables y grasa'],[9,'Motor/LTU/Belt Monthly – CRITICAL',30,'EMT','Revisar motores\nTensión de bandas\nRuido/vibración']];
   pl.forEach(([i,d,f,c,t])=>DB.planes.push({id:uid(),equipoId:DB.equipos[i].id,descripcion:d,frecuencia:f,crew:c,tareas:t,ultima:addDias(hoy(),-f+((i%4)-1)*3),activo:true}));
-  DB.usuarios.push({id:uid(),usuario:'admin',nombre:'Administrador',rol:'Admin',pass:await hash('admin123')});
+  DB.usuarios.push({id:uid(),usuario:'admin',nombre:'Administrador',rol:'Admin',pass:await hash('admin123'),activo:true,debeCambiar:true,creado:hoy()});
   save();
 }
 
@@ -132,9 +140,12 @@ async function seed(){
 let U=null;
 async function login(){
   await listo;
-  const u=DB.usuarios.find(x=>x.usuario===lu.value.trim());
-  if(!u||u.pass!==await hash(lp.value)) return alert('Usuario o contraseña incorrectos');
-  U=u;sessionStorage.setItem('mp_u',u.id);audit('Inicio de sesión');start();
+  const u=DB.usuarios.find(x=>x.usuario.toLowerCase()===lu.value.trim().toLowerCase());
+  if(!u||!(await passOK(u,lp.value))) return alert('Usuario o contraseña incorrectos');
+  if(u.activo===false) return alert('Este usuario está desactivado. Contacte al administrador.');
+  if(lp.value==='admin123')u.debeCambiar=true;
+  U=u;u.ultimoAcceso=new Date().toLocaleString();sessionStorage.setItem('mp_u',u.id);lp.value='';audit('Inicio de sesión');start();
+  if(u.debeCambiar) setTimeout(()=>cambiarPass(true),50);
 }
 function logout(){sessionStorage.removeItem('mp_u');location.reload()}
 function audit(a){DB.log.unshift({f:new Date().toLocaleString(),u:U?U.nombre:'-',a});DB.log=DB.log.slice(0,2000);save()}
@@ -145,9 +156,9 @@ const VISTAS=[['dash','📊 Dashboard',1],['equipos','🏭 Equipos',1],['planes'
 let vista='dash';
 function start(){
   document.getElementById('login').classList.add('hide');app.classList.remove('hide');
-  who.textContent=U.nombre+' ('+U.rol+')';generarOTs();autoWA(false);go('dash');
+  who.textContent=U.nombre+' ('+U.rol+')';generarOTs();autoWA(false);go('dash');popupVencidos(false);setInterval(()=>{generarOTs();bellVenc();if(modal.style.display!=='flex')popupVencidos(false)},30*60*1000);
 }
-function go(v){vista=v;nav.innerHTML=VISTAS.filter(x=>puede(x[2])).map(x=>`<button class="${x[0]===v?'act':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('');R[v]()}
+function go(v){vista=v;setTimeout(bellVenc,0);nav.innerHTML=VISTAS.filter(x=>puede(x[2])).map(x=>`<button class="${x[0]===v?'act':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('');R[v]()}
 const eqN=id=>(DB.equipos.find(e=>e.id===id)||{}).nombre||'¿?';
 const eqO=id=>DB.equipos.find(e=>e.id===id)||{};
 const prox=p=>addDias(p.ultima,p.frecuencia);
@@ -347,28 +358,101 @@ function csvHist(){
   bajar('historial_mantenimiento_'+hoy()+'.csv',rows.map(r=>r.map(c=>'"'+String(c??'').replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv');
 }
 
-R.usuarios=()=>{
-  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">Usuarios</h2><button class="btn" onclick="editU()">+ Nuevo usuario</button></div>
-  <table><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>WhatsApp</th><th></th></tr>${DB.usuarios.map(u=>`<tr><td>${esc(u.usuario)}</td><td>${esc(u.nombre)}</td><td>${u.rol}</td><td>${esc(u.tel||'-')}</td>
-  <td><button class="btn sm" onclick="editU('${u.id}')">Editar</button></td></tr>`).join('')}</table>
-  <p style="font-size:12px">Roles: <b>Técnico</b> completa OT y crea fallas · <b>Supervisor</b> + equipos, planes y respaldo · <b>Admin</b> + usuarios, borrar y auditoría.</p></div>`;
-};
-function editU(id){const u=DB.usuarios.find(x=>x.id===id)||{usuario:'',nombre:'',rol:'Técnico'};
-  modal_(`<h2>${id?'Editar':'Nuevo'} usuario</h2><div class="grid"><label>Usuario<input id="u_u" value="${esc(u.usuario)}"></label><label>Nombre<input id="u_n" value="${esc(u.nombre)}"></label>
-  <label>Rol<select id="u_r">${['Técnico','Supervisor','Admin'].map(r=>`<option ${r===u.rol?'selected':''}>${r}</option>`).join('')}</select></label>
-  <label>Contraseña ${id?'(vacío = no cambiar)':''}<input type="password" id="u_p"></label>
-  <label>WhatsApp (con código país, ej. 16095551234)<input id="u_tel" value="${esc(u.tel||'')}"></label></div>
-  <div class="row"><button class="btn" onclick="guardaU('${id||''}')">Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button>
-  ${id&&id!==U.id?`<button class="btn r" onclick="borraU('${id}')">Eliminar</button>`:''}</div>`)}
-async function guardaU(id){
-  const o={usuario:u_u.value.trim(),nombre:u_n.value.trim(),rol:u_r.value,tel:u_tel.value.replace(/\D/g,'')};
-  if(!o.usuario||!o.nombre) return alert('Complete usuario y nombre');
-  if(DB.usuarios.some(x=>x.usuario===o.usuario&&x.id!==id)) return alert('Usuario ya existe');
-  if(u_p.value) o.pass=await hash(u_p.value); else if(!id) return alert('Asigne contraseña');
-  if(id) Object.assign(DB.usuarios.find(x=>x.id===id),o); else DB.usuarios.push({id:uid(),...o});
-  audit((id?'Editó':'Creó')+' usuario '+o.usuario);save();cerrar();R.usuarios();
+/* ===================== USUARIOS Y CONTRASEÑAS ===================== */
+const ROLES=['Técnico','Supervisor','Admin'];
+const sal=()=>[...crypto.getRandomValues(new Uint8Array(16))].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function setPass(u,pw){u.salt=sal();u.pass=await hash(u.salt+pw);u.passFecha=hoy()}
+async function passOK(u,pw){return u.pass===(u.salt?await hash(u.salt+pw):await hash(pw))}
+function reglaPass(p1,p2){
+  if(p1.length<6) return 'La contraseña debe tener al menos 6 caracteres.';
+  if(!/[A-Za-z]/.test(p1)||!/\d/.test(p1)) return 'La contraseña debe tener letras y números.';
+  if(p1!==p2) return 'Las contraseñas no coinciden.';
+  return '';
 }
-function borraU(id){if(!confirm('¿Eliminar usuario?'))return;DB.usuarios=DB.usuarios.filter(x=>x.id!==id);audit('Eliminó usuario');save();cerrar();R.usuarios()}
+const ojo=id=>`<button type="button" class="btn sm s" style="margin-top:4px" onclick="${id}.type=${id}.type==='password'?'text':'password'">👁 Mostrar</button>`;
+const adminsActivos=ex=>DB.usuarios.filter(u=>u.rol==='Admin'&&u.activo!==false&&u.id!==ex).length;
+async function guardadoOK(msg){const ok=await save();if(ok)toast('✔ '+msg+' – guardado en la base de datos')}
+function toast(t){let d=document.getElementById('toast');if(!d){d=document.createElement('div');d.id='toast';d.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:10px 18px;border-radius:8px;z-index:99;font-size:14px;box-shadow:0 4px 12px #0004';document.body.appendChild(d)}
+  d.textContent=t;d.style.display='block';clearTimeout(d._t);d._t=setTimeout(()=>d.style.display='none',3000)}
+
+R.usuarios=()=>{
+  main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">👥 Usuarios (${DB.usuarios.length})</h2><input id="uf_q" placeholder="Buscar..." style="max-width:200px" oninput="R.usuarios2()"><button class="btn" onclick="editU()">+ Nuevo usuario</button></div>
+  <div id="tus"></div>
+  <p style="font-size:12px">Roles: <b>Técnico</b> completa OT y crea fallas · <b>Supervisor</b> + equipos, planes, borrar OT abiertas y respaldo · <b>Admin</b> + usuarios, borrar registros y auditoría.<br>
+  Las contraseñas se guardan cifradas (SHA-256 con sal) en la base de datos interna. Nadie puede verlas; solo restablecerlas.</p></div>`;R.usuarios2();
+};
+R.usuarios2=()=>{
+  const q=uf_q.value.toLowerCase();
+  const l=DB.usuarios.filter(u=>(u.usuario+' '+u.nombre+' '+u.rol).toLowerCase().includes(q)).sort((a,b)=>ROLES.indexOf(b.rol)-ROLES.indexOf(a.rol)||a.nombre.localeCompare(b.nombre));
+  tus.innerHTML=`<div class="tw"><table><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>WhatsApp</th><th>Estado</th><th>Último acceso</th><th>Contraseña</th><th></th></tr>
+  ${l.map(u=>`<tr><td><b>${esc(u.usuario)}</b>${u.id===U.id?' <span class="tag t-b">Usted</span>':''}</td><td>${esc(u.nombre)}</td><td>${u.rol}</td><td>${esc(u.tel||'-')}</td>
+  <td>${u.activo===false?'<span class="tag t-g">Inactivo</span>':'<span class="tag t-v">Activo</span>'}</td><td>${esc(u.ultimoAcceso||'-')}</td>
+  <td>${u.debeCambiar?'<span class="tag t-a">Debe cambiarla</span>':'<span style="font-size:12px">'+(u.passFecha?'Cambiada '+u.passFecha:'OK')+'</span>'}</td>
+  <td style="white-space:nowrap"><button class="btn sm" onclick="editU('${u.id}')">✏️ Editar</button> <button class="btn sm s" title="Restablecer contraseña" onclick="resetPass('${u.id}')">🔑</button>
+  ${u.id!==U.id?`<button class="btn sm r" title="Eliminar" onclick="borraU('${u.id}')">🗑</button>`:''}</td></tr>`).join('')||'<tr><td colspan="8">Sin usuarios.</td></tr>'}</table></div>`;
+};
+function editU(id){
+  const u=DB.usuarios.find(x=>x.id===id)||{usuario:'',nombre:'',rol:'Técnico',tel:'',activo:true,debeCambiar:true};
+  modal_(`<h2>${id?'Editar':'Nuevo'} usuario</h2><div class="grid">
+  <label>Usuario (para entrar) <b style="color:var(--rojo)">*</b><input id="u_u" value="${esc(u.usuario)}" autocomplete="off"></label>
+  <label>Nombre completo <b style="color:var(--rojo)">*</b><input id="u_n" value="${esc(u.nombre)}"></label>
+  <label>Rol<select id="u_r">${ROLES.map(r=>`<option ${r===u.rol?'selected':''}>${r}</option>`).join('')}</select></label>
+  <label>Estado<select id="u_a"><option value="1">Activo</option><option value="0" ${u.activo===false?'selected':''}>Inactivo</option></select></label>
+  <label>WhatsApp (ej. 16095551234)<input id="u_tel" value="${esc(u.tel||'')}"></label></div>
+  <div class="card" style="background:#f8fafc"><b>Contraseña</b> ${id?'<span style="font-size:12px">(déjela vacía para no cambiarla)</span>':'<b style="color:var(--rojo)">*</b>'}
+  <div class="grid"><label>Contraseña<input type="password" id="u_p" autocomplete="new-password">${ojo('u_p')}</label>
+  <label>Confirmar contraseña<input type="password" id="u_p2" autocomplete="new-password"></label></div>
+  <p style="font-size:12px;color:#666;margin:0">Mínimo 6 caracteres, con letras y números.</p>
+  <label style="margin-top:8px"><input type="checkbox" id="u_dc" style="width:auto" ${u.debeCambiar?'checked':''}> Pedir que cambie la contraseña al entrar</label></div>
+  <div class="row"><button class="btn v" onclick="guardaU('${id||''}')">💾 Guardar usuario</button><button class="btn s" onclick="cerrar()">Cancelar</button>
+  ${id&&id!==U.id?`<button class="btn r" onclick="borraU('${id}')">🗑 Eliminar</button>`:''}</div>`);
+  if(id===U.id){u_a.disabled=true}
+}
+async function guardaU(id){
+  const usuario=u_u.value.trim(),nombre=u_n.value.trim(),rol=u_r.value,activo=u_a.value==='1';
+  if(!usuario||!nombre) return alert('Complete usuario y nombre.');
+  if(/\s/.test(usuario)) return alert('El usuario no puede tener espacios.');
+  if(DB.usuarios.some(x=>x.usuario.toLowerCase()===usuario.toLowerCase()&&x.id!==id)) return alert('Ya existe un usuario "'+usuario+'".');
+  const prev=DB.usuarios.find(x=>x.id===id);
+  if(prev&&prev.rol==='Admin'&&prev.activo!==false&&(rol!=='Admin'||!activo)&&!adminsActivos(id)) return alert('Debe quedar al menos un Admin activo.');
+  if(!id||u_p.value||u_p2.value){const e=reglaPass(u_p.value,u_p2.value);if(e)return alert(e)}
+  const o=prev||{id:uid(),creado:hoy()};
+  Object.assign(o,{usuario,nombre,rol,activo,tel:u_tel.value.replace(/\D/g,''),debeCambiar:u_dc.checked});
+  if(u_p.value) await setPass(o,u_p.value);
+  if(!prev) DB.usuarios.push(o);
+  if(o.id===U.id) who.textContent=o.nombre+' ('+o.rol+')';
+  audit(`${prev?'Editó':'Creó'} usuario ${usuario} (${rol}${activo?'':', inactivo'})${u_p.value?' – contraseña asignada':''}`);
+  cerrar();R.usuarios();await guardadoOK('Usuario '+usuario);
+}
+function resetPass(id){const u=DB.usuarios.find(x=>x.id===id);
+  modal_(`<h2>🔑 Restablecer contraseña – ${esc(u.usuario)}</h2><div class="grid">
+  <label>Nueva contraseña<input type="password" id="r_p" autocomplete="new-password">${ojo('r_p')}</label><label>Confirmar<input type="password" id="r_p2" autocomplete="new-password"></label></div>
+  <p style="font-size:12px;color:#666">Mínimo 6 caracteres, con letras y números.</p>
+  <label><input type="checkbox" id="r_dc" style="width:auto" checked> Pedir que la cambie al entrar</label>
+  <div class="row"><button class="btn v" onclick="guardaReset('${id}')">💾 Guardar</button><button class="btn s" onclick="cerrar()">Cancelar</button></div>`)}
+async function guardaReset(id){const e=reglaPass(r_p.value,r_p2.value);if(e)return alert(e);
+  const u=DB.usuarios.find(x=>x.id===id);await setPass(u,r_p.value);u.debeCambiar=r_dc.checked;
+  audit('Restableció contraseña de '+u.usuario);cerrar();R.usuarios();await guardadoOK('Contraseña de '+u.usuario)}
+function borraU(id){const u=DB.usuarios.find(x=>x.id===id);
+  if(id===U.id) return alert('No puede eliminar su propio usuario.');
+  if(u.rol==='Admin'&&u.activo!==false&&!adminsActivos(id)) return alert('Debe quedar al menos un Admin activo.');
+  if(!confirm(`¿Eliminar el usuario "${u.usuario}" (${u.nombre})?\nSu historial de trabajos se conserva.`))return;
+  DB.usuarios=DB.usuarios.filter(x=>x.id!==id);audit('Eliminó usuario '+u.usuario);cerrar();R.usuarios();guardadoOK('Usuario eliminado')}
+function cambiarPass(forzado){
+  modal_(`<h2>🔑 ${forzado?'Debe cambiar su contraseña':'Cambiar mi contraseña'}</h2>
+  ${forzado?'<p style="font-size:13px;background:#fff3cd;padding:8px;border-radius:6px">Por seguridad, cree una contraseña nueva antes de continuar.</p>':''}
+  <label>Contraseña actual<input type="password" id="m_a" autocomplete="current-password"></label>
+  <div class="grid"><label>Nueva contraseña<input type="password" id="m_p" autocomplete="new-password">${ojo('m_p')}</label><label>Confirmar nueva<input type="password" id="m_p2" autocomplete="new-password"></label></div>
+  <p style="font-size:12px;color:#666">Mínimo 6 caracteres, con letras y números.</p>
+  <div class="row"><button class="btn v" onclick="guardaMiPass()">💾 Guardar</button>${forzado?'<button class="btn s" onclick="logout()">Salir</button>':'<button class="btn s" onclick="cerrar()">Cancelar</button>'}</div>`)}
+async function guardaMiPass(){
+  if(!(await passOK(U,m_a.value))) return alert('La contraseña actual no es correcta.');
+  const e=reglaPass(m_p.value,m_p2.value);if(e)return alert(e);
+  if(m_p.value===m_a.value) return alert('La nueva contraseña debe ser diferente a la actual.');
+  await setPass(U,m_p.value);U.debeCambiar=false;audit('Cambió su contraseña');cerrar();
+  if(vista==='usuarios')R.usuarios();await guardadoOK('Contraseña cambiada');
+  popupVencidos(false);
+}
 
 R.datos=()=>{main.innerHTML=`<div class="card"><h2>Respaldo de datos</h2>
   <p>Los datos se guardan en la base de datos interna del programa (IndexedDB) en este equipo. Haga un respaldo periódico y úselo para pasar los datos a otra PC o al iPhone.</p>
@@ -451,6 +535,36 @@ function confirmaBorrarOT(id){
   DB.ots=DB.ots.filter(x=>x.id!==id);
   audit(`Borró ${o.estado==='Completada'?'registro':'OT'} ${o.num} (${eqN(o.equipoId)} – ${o.descripcion}) · Motivo: ${d_mot.value}${d_det.value?' – '+d_det.value:''}`);
   save();cerrar();go(vista);
+}
+
+/* ===================== POP-UP VENCIDOS ===================== */
+const vencidas=()=>DB.ots.filter(o=>o.estado!=='Completada'&&diff(o.fin)<0).sort((a,b)=>(eqO(b.equipoId).prioridad||0)-(eqO(a.equipoId).prioridad||0)||a.fin.localeCompare(b.fin));
+function bellVenc(){const n=vencidas().length;bellV.style.display=n?'inline-block':'none';bellV.textContent='⚠️ '+n+' vencido'+(n===1?'':'s')}
+function popupVencidos(forzar){
+  bellVenc();
+  const l=vencidas(),k='mp_popv_'+U.id;
+  if(!l.length){if(forzar)alert('✅ No hay mantenimientos vencidos.');return}
+  const firma=hoy()+'|'+l.map(o=>o.id).join(',');
+  if(!forzar&&localStorage.getItem(k)===firma)return;
+  const crit=l.filter(o=>eqO(o.equipoId).prioridad>=7).length;
+  modal_(`<h2 style="color:var(--rojo)">⚠️ Mantenimiento vencido</h2>
+   <p>Hay <b>${l.length}</b> mantenimiento${l.length===1?'':'s'} vencido${l.length===1?'':'s'}${crit?` · <span class="tag t-r">${crit} CRÍTICO${crit===1?'':'S'}</span>`:''}</p>
+   <div class="tw" style="max-height:45vh"><table><tr><th>OT</th><th>Equipo</th><th>Descripción</th><th>Límite</th><th>Atraso</th><th></th></tr>
+   ${l.map(o=>`<tr><td>${o.num}</td><td>${esc(eqN(o.equipoId))} ${eqO(o.equipoId).prioridad>=7?'<span class="tag t-r">CRÍTICO</span>':''}</td><td>${esc(o.descripcion)}</td><td>${o.fin}</td>
+   <td><span class="tag t-r">${-diff(o.fin)} día${-diff(o.fin)===1?'':'s'}</span></td>
+   <td>${`<button class="btn sm v" onclick="cerrarOT('${o.id}')">Completar</button>`}</td></tr>`).join('')}</table></div>
+   <label style="margin-top:10px"><input type="checkbox" id="pv_hoy" style="width:auto"> No volver a mostrar hoy (salvo que venza otro mantenimiento)</label>
+   <div class="row"><button class="btn" onclick="cerrarPopV();go('ots')">📋 Ver órdenes</button>
+   <button class="btn v" onclick="cerrarPopV();waResumen()">📲 Avisar por WhatsApp</button>
+   <button class="btn s" onclick="cerrarPopV();compartir(msgResumen(),'Mantenimiento vencido')">📤 Compartir</button>
+   <button class="btn s" onclick="cerrarPopV()">Cerrar</button></div>`);
+  document.querySelector('#modal .card').classList.add('alerta-v');
+  document.querySelector('#modal .card').style.maxWidth='860px';
+  window._popFirma=firma;audit(`Alerta de ${l.length} mantenimiento(s) vencido(s) mostrada`);
+}
+function cerrarPopV(){
+  if(document.getElementById('pv_hoy')&&pv_hoy.checked)localStorage.setItem('mp_popv_'+U.id,window._popFirma);
+  cerrar();
 }
 
 /* ===================== COMPARTIR ===================== */
@@ -627,7 +741,7 @@ function exportXLSX(){
 }
 
 /* ===================== UTILIDADES ===================== */
-function modal_(h){mbody.innerHTML=h;modal.style.display='flex'}
+function modal_(h){const c=document.querySelector('#modal .card');c.classList.remove('alerta-v');c.style.maxWidth='';mbody.innerHTML=h;modal.style.display='flex'}
 function cerrar(){modal.style.display='none'}
 function bajar(n,txt,t){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:t}));a.download=n;a.click()}
 lp.addEventListener('keydown',e=>{if(e.key==='Enter')login()});
@@ -639,7 +753,7 @@ function addBaterias(){
    tareas:['EPP: careta, gafas y guantes resistentes a ácido','Verificar lavaojos/ducha de emergencia y ventilación del área','Batería completamente cargada antes de rellenar','Medir nivel en cada celda con el medidor','Nivel correcto: sobre las placas, sin pasar el indicador de llenado','Rellenar solo con agua destilada; no sobrellenar','Registrar celdas con nivel bajo y la densidad si aplica','Revisar corrosión, fugas y conexiones','Verificar calibración/funcionamiento del medidor'].join('\n')});
   if(typeof audit==='function') DB.log.unshift({f:new Date().toLocaleString(),u:'Sistema',a:'Agregó equipo BATLVL1 – Medidor de Nivel de Líquido de Baterías'});
 }
-(async()=>{await listo;const s=sessionStorage.getItem('mp_u');if(s){U=DB.usuarios.find(u=>u.id===s);if(U)start()}})();
+(async()=>{await listo;const s=sessionStorage.getItem('mp_u');if(s){U=DB.usuarios.find(u=>u.id===s&&u.activo!==false);if(U){start();if(U.debeCambiar)setTimeout(()=>cambiarPass(true),50)}}})();
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js');
 </script>
 </body>
