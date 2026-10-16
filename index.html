@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <meta name="theme-color" content="#0b3d91">
-<title>Ferretería Quilvio – ManteniPro v2.1.0</title>
+<title>Ferretería Quilvio – ManteniPro v2.1.1</title>
 <style>
 :root{--azul:#0b3d91;--azul2:#1565c0;--rojo:#c62828;--ama:#f9a825;--verde:#2e7d32;--gris:#f3f5f9;--borde:#d5dbe5}
 *{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--gris);color:#1d2433}
@@ -74,7 +74,7 @@ label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
 </div>
 
 <div id="app" class="hide">
-<header><h1><img id="hdrLogo" alt="Logo"><span class="empresa"><b id="hdrEmpresa">Ferretería Quilvio</b><small>ManteniPro – Mantenimiento de Equipos · v2.1.0</small></span></h1>
+<header><h1><img id="hdrLogo" alt="Logo"><span class="empresa"><b id="hdrEmpresa">Ferretería Quilvio</b><small>ManteniPro – Mantenimiento de Equipos · v2.1.1</small></span></h1>
 <span id="nubeB" class="tag"></span><button id="bellV" title="Mantenimientos vencidos" onclick="popupVencidos(true)"></button>
 <span id="who"></span><button class="btn s sm" onclick="miCuenta()">👤 Mi cuenta</button><button class="btn s sm" onclick="logout()">Salir</button></header>
 <nav id="nav"></nav>
@@ -89,7 +89,7 @@ label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
    ManteniPro v2.0.0 – Ferretería Quilvio
    Un solo usuario · Base de datos en la nube (Supabase)
    ===================================================================== */
-const VERSION='2.1.0';
+const VERSION='2.1.1';
 /* Opcional: escriba aquí la URL y la clave pública para no tener que
    configurarlas en cada equipo (por ejemplo, al publicar en GitHub Pages). */
 const NUBE_URL='';
@@ -456,7 +456,8 @@ function tablaOT(l){
 R.equipos=()=>{
   main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">🏭 Equipos</h2>
   <select id="fst" style="max-width:150px" onchange="R.equipos2()"><option value="">Todos los status</option>${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
-  <input id="fq" placeholder="Buscar..." style="max-width:220px" oninput="R.equipos2()"><button class="btn" onclick="editEq()">+ Nuevo equipo</button></div><div id="tq"></div></div>`;R.equipos2();
+  <input id="fq" placeholder="Buscar..." style="max-width:220px" oninput="R.equipos2()"><button class="btn" onclick="editEq()">+ Nuevo equipo</button>
+  <button class="btn r" onclick="borrarTodosEquipos()">🗑 Borrar todos los equipos</button></div><div id="tq"></div></div>`;R.equipos2();
 };
 R.equipos2=()=>{
   const q=fq.value.toLowerCase(),fs=fst.value;
@@ -491,6 +492,31 @@ function borraEq(id){const e=DB.equipos.find(x=>x.id===id);
   if(!confirm(`¿Eliminar el equipo ${e.codigo} y sus planes PM?\nSus órdenes abiertas también se borrarán; el historial se conserva.`))return;
   DB.equipos=DB.equipos.filter(x=>x.id!==id);DB.planes=DB.planes.filter(p=>p.equipoId!==id);DB.ots=DB.ots.filter(o=>!(o.equipoId===id&&o.estado!=='Completada'));
   audit('Eliminó equipo '+e.codigo);cerrar();R.equipos()}
+
+async function borrarTodosEquipos(){
+  const total=DB.equipos.length;
+  if(!total)return alert('No existen equipos para eliminar.');
+
+  const planes=DB.planes.length;
+  const abiertas=DB.ots.filter(o=>o.estado!=='Completada').length;
+  const completadas=DB.ots.filter(o=>o.estado==='Completada').length;
+  const criticos=DB.equipos.filter(e=>+e.prioridad>=7).length;
+
+  if(!confirm(`⚠️ ATENCIÓN\n\nSe eliminarán TODOS los equipos del sistema.\n\nEquipos: ${total}\nEquipos críticos: ${criticos}\nPlanes PM: ${planes}\nÓrdenes abiertas: ${abiertas}\n\nEl historial completado (${completadas} registros) se conservará.\n\n¿Desea continuar?`))return;
+
+  const texto=prompt('Para confirmar escriba exactamente:\n\nBORRAR TODO');
+  if(texto!=='BORRAR TODO')return alert('Operación cancelada. No se eliminó ningún equipo.');
+
+  const historial=DB.ots.filter(o=>o.estado==='Completada');
+  DB.equipos=[];
+  DB.planes=[];
+  DB.ots=historial;
+
+  const ok=await audit(`Eliminó todos los equipos (${total}), planes PM (${planes}) y órdenes abiertas (${abiertas}); conservó ${completadas} registros completados`);
+  go('equipos');
+  if(ok===false)toast('Equipos eliminados en este dispositivo; pendientes de sincronizar con la nube.','#c62828');
+  else toast(`✔ ${total} equipos eliminados; historial conservado.`);
+}
 
 /* ---------- PLANES PM ---------- */
 R.planes=()=>{
