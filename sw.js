@@ -1,4 +1,4 @@
-const C='mantenipro-v2.1.1',F=['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
+const C='mantenipro-v2.2.0',F=['./','./index.html','./manifest.json','./icons/icon-192.png','./icons/icon-512.png'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(C).then(c=>c.addAll(F)))});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x))))));
 self.addEventListener('fetch',e=>{
