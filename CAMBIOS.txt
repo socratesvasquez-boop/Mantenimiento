@@ -1,4 +1,4 @@
-ManteniPro v2.3.0 - Ferreteria Quilvio
+ManteniPro v2.3.1 - Ferreteria Quilvio
 - NUEVO: un solo usuario (correo y contrasena) y base de datos en la nube (Supabase)
 - Los mismos datos en PC, iPhone y web; sincronizacion automatica
 - Funciona sin internet y sube los cambios al reconectar
@@ -10,4 +10,4 @@ ManteniPro v2.3.0 - Ferreteria Quilvio
 - v2.1: equipos y ordenes de trabajo tambien se guardan como TABLAS en la nube
   (Supabase: tablas 'equipos' y 'ordenes'), visibles en Table Editor y exportables a CSV
 
-- v2.3.0: selección por checkbox y borrado masivo solo de los equipos seleccionados; elimina sus planes PM y OT abiertas, conserva historial completado y sincroniza con Supabase.
+- v2.3.1: selección persistente por checkbox y popup interno confiable para confirmar el borrado de equipos seleccionados.
