@@ -86,22 +86,3 @@ create policy "ot_dueno" on public.ordenes for all to authenticated using (auth.
 
 grant select, insert, update, delete on public.equipos, public.ordenes to authenticated;
 revoke all on public.equipos, public.ordenes from anon;
-
--- v2.2: políticas explícitas requeridas para vaciar equipos y órdenes desde ManteniPro
-drop policy if exists "equipos_select" on public.equipos;
-drop policy if exists "equipos_insert" on public.equipos;
-drop policy if exists "equipos_update" on public.equipos;
-drop policy if exists "equipos_delete" on public.equipos;
-drop policy if exists "ordenes_select" on public.ordenes;
-drop policy if exists "ordenes_insert" on public.ordenes;
-drop policy if exists "ordenes_update" on public.ordenes;
-drop policy if exists "ordenes_delete" on public.ordenes;
-create policy "equipos_select" on public.equipos for select to authenticated using ((select auth.uid())=user_id);
-create policy "equipos_insert" on public.equipos for insert to authenticated with check ((select auth.uid())=user_id);
-create policy "equipos_update" on public.equipos for update to authenticated using ((select auth.uid())=user_id) with check ((select auth.uid())=user_id);
-create policy "equipos_delete" on public.equipos for delete to authenticated using ((select auth.uid())=user_id);
-create policy "ordenes_select" on public.ordenes for select to authenticated using ((select auth.uid())=user_id);
-create policy "ordenes_insert" on public.ordenes for insert to authenticated with check ((select auth.uid())=user_id);
-create policy "ordenes_update" on public.ordenes for update to authenticated using ((select auth.uid())=user_id) with check ((select auth.uid())=user_id);
-create policy "ordenes_delete" on public.ordenes for delete to authenticated using ((select auth.uid())=user_id);
-notify pgrst, 'reload schema';

@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <meta name="theme-color" content="#0b3d91">
-<title>Ferretería Quilvio – ManteniPro v2.2.0</title>
+<title>Ferretería Quilvio – ManteniPro v2.3.0</title>
 <style>
 :root{--azul:#0b3d91;--azul2:#1565c0;--rojo:#c62828;--ama:#f9a825;--verde:#2e7d32;--gris:#f3f5f9;--borde:#d5dbe5}
 *{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--gris);color:#1d2433}
@@ -74,7 +74,7 @@ label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
 </div>
 
 <div id="app" class="hide">
-<header><h1><img id="hdrLogo" alt="Logo"><span class="empresa"><b id="hdrEmpresa">Ferretería Quilvio</b><small>ManteniPro – Mantenimiento de Equipos · v2.2.0</small></span></h1>
+<header><h1><img id="hdrLogo" alt="Logo"><span class="empresa"><b id="hdrEmpresa">Ferretería Quilvio</b><small>ManteniPro – Mantenimiento de Equipos · v2.3.0</small></span></h1>
 <span id="nubeB" class="tag"></span><button id="bellV" title="Mantenimientos vencidos" onclick="popupVencidos(true)"></button>
 <span id="who"></span><button class="btn s sm" onclick="miCuenta()">👤 Mi cuenta</button><button class="btn s sm" onclick="logout()">Salir</button></header>
 <nav id="nav"></nav>
@@ -89,7 +89,7 @@ label{font-size:12px;color:#4a5568;display:block;margin-bottom:8px}
    ManteniPro v2.0.0 – Ferretería Quilvio
    Un solo usuario · Base de datos en la nube (Supabase)
    ===================================================================== */
-const VERSION='2.2.0';
+const VERSION='2.3.0';
 /* Opcional: escriba aquí la URL y la clave pública para no tener que
    configurarlas en cada equipo (por ejemplo, al publicar en GitHub Pages). */
 const NUBE_URL='';
@@ -457,16 +457,16 @@ R.equipos=()=>{
   main.innerHTML=`<div class="card"><div class="row"><h2 style="flex:1">🏭 Equipos</h2>
   <select id="fst" style="max-width:150px" onchange="R.equipos2()"><option value="">Todos los status</option>${STATUS.map(s=>`<option>${s}</option>`).join('')}</select>
   <input id="fq" placeholder="Buscar..." style="max-width:220px" oninput="R.equipos2()"><button class="btn" onclick="editEq()">+ Nuevo equipo</button>
-  <button class="btn r" onclick="borrarTodoMantenimiento()">🗑 Borrar equipos, OT y planes PM</button></div><div id="tq"></div></div>`;R.equipos2();
+  <button class="btn r" id="btnBorrarSel" onclick="borrarEquiposSeleccionados()" disabled>🗑 Borrar seleccionados (0)</button></div><div id="tq"></div></div>`;R.equipos2();
 };
 R.equipos2=()=>{
   const q=fq.value.toLowerCase(),fs=fst.value;
   const l=DB.equipos.filter(e=>JSON.stringify(e).toLowerCase().includes(q)&&(!fs||e.status===fs)).sort((a,b)=>STATUS.indexOf(b.status)-STATUS.indexOf(a.status));
-  tq.innerHTML=`<div class="tw"><table><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Ubicación</th><th>Prioridad</th><th>Status</th><th>Estado</th><th>Próximo PM</th><th></th></tr>
-  ${l.map(e=>{const ps=DB.planes.filter(p=>p.equipoId===e.id&&p.activo).map(prox).sort();return `<tr><td>${esc(e.codigo)}</td><td>${esc(e.nombre)}</td><td>${esc(e.tipo)}</td><td>${esc(e.ubicacion)}</td>
+  tq.innerHTML=`<div class="tw"><table><tr><th style="width:44px"><input type="checkbox" id="eqTodos" style="width:auto" title="Seleccionar todos los equipos visibles" onchange="seleccionarEquiposVisibles(this.checked)"></th><th>Código</th><th>Nombre</th><th>Tipo</th><th>Ubicación</th><th>Prioridad</th><th>Status</th><th>Estado</th><th>Próximo PM</th><th></th></tr>
+  ${l.map(e=>{const ps=DB.planes.filter(p=>p.equipoId===e.id&&p.activo).map(prox).sort();return `<tr><td><input type="checkbox" class="eq-check" style="width:auto" value="${e.id}" onchange="actualizarBotonBorrarSeleccionados()"></td><td>${esc(e.codigo)}</td><td>${esc(e.nombre)}</td><td>${esc(e.tipo)}</td><td>${esc(e.ubicacion)}</td>
   <td>${prTag(e.prioridad)}</td><td><select class="stsel" style="width:auto;padding:3px" onchange="setStatus('${e.id}',this.value)">${STATUS.map(s=>`<option ${s===e.status?'selected':''}>${s}</option>`).join('')}</select> ${stTag(e.status)}</td>
   <td>${esc(e.estado)}</td><td>${ps[0]?ps[0]+' '+estadoTag(diff(ps[0])):'-'}</td>
-  <td style="white-space:nowrap"><button class="btn sm s" onclick="histEq('${e.id}')">Historial</button> <button class="btn sm s" onclick="nuevaCorr('${e.id}')">Falla/OT</button> <button class="btn sm s" onclick="editPlan(null,false,'${e.id}')">+ Plan PM</button> <button class="btn sm" onclick="editEq('${e.id}')">Editar</button></td></tr>`}).join('')||'<tr><td colspan="9">Sin equipos.</td></tr>'}</table></div>`;
+  <td style="white-space:nowrap"><button class="btn sm s" onclick="histEq('${e.id}')">Historial</button> <button class="btn sm s" onclick="nuevaCorr('${e.id}')">Falla/OT</button> <button class="btn sm s" onclick="editPlan(null,false,'${e.id}')">+ Plan PM</button> <button class="btn sm" onclick="editEq('${e.id}')">Editar</button></td></tr>`}).join('')||'<tr><td colspan="10">Sin equipos.</td></tr>'}</table></div>`;
 };
 function editEq(id){
   const e=DB.equipos.find(x=>x.id===id)||{codigo:'',nombre:'',tipo:'',ubicacion:'',prioridad:2,marca:'',serie:'',estado:'Operativo',status:''};
@@ -493,42 +493,50 @@ function borraEq(id){const e=DB.equipos.find(x=>x.id===id);
   DB.equipos=DB.equipos.filter(x=>x.id!==id);DB.planes=DB.planes.filter(p=>p.equipoId!==id);DB.ots=DB.ots.filter(o=>!(o.equipoId===id&&o.estado!=='Completada'));
   audit('Eliminó equipo '+e.codigo);cerrar();R.equipos()}
 
-async function borrarTodoMantenimiento(){
-  const tot={equipos:DB.equipos.length,planes:DB.planes.length,ots:DB.ots.length};
-  if(!tot.equipos&&!tot.planes&&!tot.ots)return alert('No hay equipos, órdenes de trabajo ni planes PM para eliminar.');
-
-  const aviso=`⚠️ BORRADO TOTAL E IRREVERSIBLE\n\nSe eliminarán tanto en este dispositivo como en Supabase:\n\n• ${tot.equipos} equipos\n• ${tot.planes} planes PM\n• ${tot.ots} órdenes de trabajo, incluidas las completadas y su historial\n\nLa configuración, el usuario, el logo y la auditoría se conservarán.\n\n¿Desea continuar?`;
-  if(!confirm(aviso))return;
-
-  const texto=prompt('Para confirmar el borrado total escriba exactamente:\n\nBORRAR TODO');
-  if((texto||'').trim().toUpperCase()!=='BORRAR TODO')return alert('Operación cancelada. No se eliminó ningún dato.');
-
-  const boton=document.querySelector('button[onclick="borrarTodoMantenimiento()"]');
-  if(boton){boton.disabled=true;boton.textContent='⏳ Borrando local y nube…'}
+function idsEquiposSeleccionados(){
+  return [...document.querySelectorAll('.eq-check:checked')].map(c=>c.value);
+}
+function actualizarBotonBorrarSeleccionados(){
+  const n=idsEquiposSeleccionados().length,b=document.getElementById('btnBorrarSel');
+  if(b){b.disabled=n===0;b.textContent=`🗑 Borrar seleccionados (${n})`}
+  const todos=document.getElementById('eqTodos'),checks=[...document.querySelectorAll('.eq-check')];
+  if(todos){todos.checked=checks.length>0&&checks.every(c=>c.checked);todos.indeterminate=checks.some(c=>c.checked)&&!checks.every(c=>c.checked)}
+}
+function seleccionarEquiposVisibles(marcar){
+  document.querySelectorAll('.eq-check').forEach(c=>c.checked=marcar);
+  actualizarBotonBorrarSeleccionados();
+}
+async function borrarEquiposSeleccionados(){
+  const ids=idsEquiposSeleccionados();
+  if(!ids.length)return alert('Seleccione al menos un equipo.');
+  const seleccionados=DB.equipos.filter(e=>ids.includes(e.id));
+  const planes=DB.planes.filter(p=>ids.includes(p.equipoId));
+  const abiertas=DB.ots.filter(o=>ids.includes(o.equipoId)&&o.estado!=='Completada');
+  const completadas=DB.ots.filter(o=>ids.includes(o.equipoId)&&o.estado==='Completada');
+  if(!confirm(`¿Eliminar ${seleccionados.length} equipo(s) seleccionado(s)?\n\nTambién se eliminarán ${planes.length} planes PM y ${abiertas.length} órdenes abiertas asociadas.\n\nSe conservarán ${completadas.length} órdenes completadas en el historial.`))return;
+  const texto=prompt(`Para confirmar escriba exactamente:\n\nBORRAR ${seleccionados.length}`);
+  if((texto||'').trim().toUpperCase()!==`BORRAR ${seleccionados.length}`)return alert('Operación cancelada. No se eliminó ningún equipo.');
 
   const respaldo={equipos:clon(DB.equipos),planes:clon(DB.planes),ots:clon(DB.ots)};
-  DB.equipos=[]; DB.planes=[]; DB.ots=[];
-  DB.log.unshift({id:uid(),f:new Date().toLocaleString(),u:U?U.nombre:'Sistema',
-    a:`Borrado total: ${tot.equipos} equipos, ${tot.planes} planes PM y ${tot.ots} órdenes de trabajo`});
+  const codigos=seleccionados.map(e=>e.codigo).join(', ');
+  DB.equipos=DB.equipos.filter(e=>!ids.includes(e.id));
+  DB.planes=DB.planes.filter(p=>!ids.includes(p.equipoId));
+  DB.ots=DB.ots.filter(o=>!ids.includes(o.equipoId)||o.estado==='Completada');
+  DB.log.unshift({id:uid(),f:new Date().toLocaleString(),u:U?U.nombre:'Sistema',a:`Eliminó ${seleccionados.length} equipos seleccionados (${codigos}), ${planes.length} planes PM y ${abiertas.length} órdenes abiertas; conservó ${completadas.length} registros completados`});
   if(DB.log.length>3000)DB.log.length=3000;
   R.equipos();
 
   const guardado=await save();
   if(!guardado){
-    DB.equipos=respaldo.equipos;DB.planes=respaldo.planes;DB.ots=respaldo.ots;
-    R.equipos();
-    alert('No se pudo guardar el borrado en la nube. Los datos se restauraron y no se eliminó nada. Revise la conexión e intente otra vez.');
+    DB.equipos=respaldo.equipos;DB.planes=respaldo.planes;DB.ots=respaldo.ots;R.equipos();
+    alert('No se pudo guardar la eliminación en la nube. Los datos se restauraron. Revise la conexión e intente de nuevo.');
     return;
   }
-
   await espejo(DB,true);
   if(ESPEJO.ok===false){
-    alert('La base principal quedó vacía, pero no se pudieron limpiar las tablas equipos/ordenes de Supabase:\n\n'+ESPEJO.msg+'\n\nRevise las políticas RLS de DELETE y use Base de Datos → Subir todo a las tablas.');
-    toast('Borrado principal guardado; tablas espejo pendientes.','#c62828');
-  }else{
-    localStorage.setItem('mp_mir_'+SES.uid,JSON.stringify({equipos:{},ordenes:{}}));
-    toast(`✔ Borrado completo: ${tot.equipos} equipos, ${tot.planes} planes PM y ${tot.ots} OT.`);
-  }
+    alert('Los equipos se eliminaron de ManteniPro, pero no se pudo actualizar la tabla equipos de Supabase:\n\n'+ESPEJO.msg+'\n\nRevise las políticas RLS de DELETE.');
+    toast('Borrado principal guardado; tabla equipos pendiente.','#c62828');
+  }else toast(`✔ ${seleccionados.length} equipos seleccionados eliminados localmente y en la nube.`);
 }
 
 /* ---------- PLANES PM ---------- */
